@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dota 2 Fantasy</title>
+</head>
+<body data-active-stage="groupStage">
+
+  <!-- STAGE SELECTOR -->
+  <header class="stage-selector">
+    <button class="stage-btn active" data-stage="groupStage">Group Stage</button>
+    <button class="stage-btn" data-stage="mainStage">Main Stage</button>
+  </header>
+
+  <main class="dashboard">
+
+    <!-- CORE -->
+    <section class="column">
+      <h2 class="role-title">Core</h2>
+      <div class="column-banner">
+        <article class="emblem emblem--red">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Creep Score</option>
+              <option>GPM</option>
+              <option>Deaths</option>
+              <option>Kills</option>
+              <option selected>Towers</option>
+              <option>Madstones Collected</option>
+            </select></span>
+            <span class="emblem-total">190%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option selected>Tier III</option>
+              <option>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option selected>Unique</option>
+            </select></span>
+            <span class="value">+30%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--green">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option selected>Teamfight</option>
+              <option>Stuns</option>
+              <option>Tormentor Kills</option>
+              <option>Roshan Kills</option>
+              <option>First Blood</option>
+              <option>Courier Kills</option>
+            </select></span>
+            <span class="emblem-total">260%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option selected>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+100%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--red">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Creep Score</option>
+              <option selected>GPM</option>
+              <option>Deaths</option>
+              <option>Kills</option>
+              <option>Towers</option>
+              <option>Madstones Collected</option>
+            </select></span>
+            <span class="emblem-total">310%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option>Tier IV</option>
+              <option selected>Tier V</option>
+            </select></span>
+            <span class="value">+150%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--green">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option selected>Teamfight</option>
+              <option>Stuns</option>
+              <option>Tormentor Kills</option>
+              <option>Roshan Kills</option>
+              <option>First Blood</option>
+              <option>Courier Kills</option>
+            </select></span>
+            <span class="emblem-total">240%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option selected>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+100%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option selected>Unique</option>
+            </select></span>
+            <span class="value">+30%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--red">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option selected>Creep Score</option>
+              <option>GPM</option>
+              <option>Deaths</option>
+              <option>Kills</option>
+              <option>Towers</option>
+              <option>Madstones Collected</option>
+            </select></span>
+            <span class="emblem-total">210%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option selected>Tier III</option>
+              <option>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- MID -->
+    <section class="column">
+      <h2 class="role-title">Mid</h2>
+      <div class="column-banner">
+        <article class="emblem emblem--red">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Creep Score</option>
+              <option>GPM</option>
+              <option>Deaths</option>
+              <option>Kills</option>
+              <option selected>Towers</option>
+              <option>Madstones Collected</option>
+            </select></span>
+            <span class="emblem-total">280%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option>Tier IV</option>
+              <option selected>Tier V</option>
+            </select></span>
+            <span class="value">+150%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option selected>Unique</option>
+            </select></span>
+            <span class="value">+30%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--blue">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Wards Placed</option>
+              <option>Camps Stacked</option>
+              <option>Lotuses Gained</option>
+              <option>Watchers Taken</option>
+              <option selected>Runes Grabbed</option>
+              <option>Smokes Used</option>
+            </select></span>
+            <span class="emblem-total">250%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option>Tier IV</option>
+              <option selected>Tier V</option>
+            </select></span>
+            <span class="value">+150%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">0%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--green">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option selected>Teamfight</option>
+              <option>Stuns</option>
+              <option>Tormentor Kills</option>
+              <option>Roshan Kills</option>
+              <option>First Blood</option>
+              <option>Courier Kills</option>
+            </select></span>
+            <span class="emblem-total">250%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option>Tier IV</option>
+              <option selected>Tier V</option>
+            </select></span>
+            <span class="value">+150%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">0%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--red">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Creep Score</option>
+              <option>GPM</option>
+              <option>Deaths</option>
+              <option selected>Kills</option>
+              <option>Towers</option>
+              <option>Madstones Collected</option>
+            </select></span>
+            <span class="emblem-total">230%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option selected>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+100%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option selected>Unique</option>
+            </select></span>
+            <span class="value">+30%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--green">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Teamfight</option>
+              <option>Stuns</option>
+              <option>Tormentor Kills</option>
+              <option>Roshan Kills</option>
+              <option selected>First Blood</option>
+              <option>Courier Kills</option>
+            </select></span>
+            <span class="emblem-total">200%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option selected>Tier III</option>
+              <option>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">+40%</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- SUPPORT -->
+    <section class="column">
+      <h2 class="role-title">Support</h2>
+      <div class="column-banner">
+        <article class="emblem emblem--blue">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Wards Placed</option>
+              <option>Camps Stacked</option>
+              <option>Lotuses Gained</option>
+              <option>Watchers Taken</option>
+              <option>Runes Grabbed</option>
+              <option selected>Smokes Used</option>
+            </select></span>
+            <span class="emblem-total">250%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option>Tier IV</option>
+              <option selected>Tier V</option>
+            </select></span>
+            <span class="value">+150%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option>Fractal</option>
+              <option>Friendly</option>
+              <option selected>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">0%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--green">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Teamfight</option>
+              <option selected>Stuns</option>
+              <option>Tormentor Kills</option>
+              <option>Roshan Kills</option>
+              <option>First Blood</option>
+              <option>Courier Kills</option>
+            </select></span>
+            <span class="emblem-total">190%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option selected>Tier I</option>
+              <option>Tier II</option>
+              <option>Tier III</option>
+              <option>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+10%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">+80%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--blue">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Wards Placed</option>
+              <option>Camps Stacked</option>
+              <option selected>Lotuses Gained</option>
+              <option>Watchers Taken</option>
+              <option>Runes Grabbed</option>
+              <option>Smokes Used</option>
+            </select></span>
+            <span class="emblem-total">220%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option selected>Tier III</option>
+              <option>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--green">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Teamfight</option>
+              <option>Stuns</option>
+              <option>Tormentor Kills</option>
+              <option>Roshan Kills</option>
+              <option>First Blood</option>
+              <option selected>Courier Kills</option>
+            </select></span>
+            <span class="emblem-total">200%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option>Tier II</option>
+              <option selected>Tier III</option>
+              <option>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+60%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option>Fractal</option>
+              <option>Friendly</option>
+              <option selected>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">+30%</span>
+          </div>
+        </article>
+
+        <article class="emblem emblem--blue">
+          <div class="emblem-header">
+            <span class="select-wrap"><select class="emblem-select" aria-label="Emblem stat">
+              <option>Wards Placed</option>
+              <option selected>Camps Stacked</option>
+              <option>Lotuses Gained</option>
+              <option>Watchers Taken</option>
+              <option>Runes Grabbed</option>
+              <option>Smokes Used</option>
+            </select></span>
+            <span class="emblem-total">170%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="quality-select" aria-label="Quality">
+              <option>Tier I</option>
+              <option selected>Tier II</option>
+              <option>Tier III</option>
+              <option>Tier IV</option>
+              <option>Tier V</option>
+            </select></span>
+            <span class="value">+30%</span>
+          </div>
+          <div class="emblem-row">
+            <span class="select-wrap"><select class="trait-select" aria-label="Trait">
+              <option selected>Fractal</option>
+              <option>Friendly</option>
+              <option>Benevolent</option>
+              <option>Vampiric</option>
+              <option>Unique</option>
+            </select></span>
+            <span class="value">+40%</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Global operations panel -->
+  <section class="global-operations">
+    <div class="operations-panel">
+      <h2 class="panel-title">Probability Calculator</h2>
+      <div class="op-tabs">
+        <button class="op-tab-btn active" data-target="stats">Stats</button>
+        <button class="op-tab-btn" data-target="quality">Qualities</button>
+        <button class="op-tab-btn" data-target="trait">Traits</button>
+      </div>
+      
+      <div class="op-content active" data-content="stats">
+        <div class="op-group">
+          <button class="op-btn op-btn--green">Reroll Stat for Green Emblems</button>
+          <button class="op-btn op-btn--green">Reroll Stat for the first Green Emblem</button>
+          <button class="op-btn op-btn--green">Reroll Stat for the last Green Emblem</button>
+          <button class="op-btn op-btn--green">Reroll Stat for one random Green Emblem</button>
+        </div>
+        
+        <div class="op-group">
+          <button class="op-btn op-btn--red">Reroll Stat for Red Emblems</button>
+        </div>
+        
+        <div class="op-group">
+          <button class="op-btn op-btn--blue">Reroll Stat for Blue Emblems</button>
+        </div>
+      </div>
+      
+      <div class="op-content" data-content="quality">
+        <div class="op-group op-group--full-width">
+          <button class="op-btn op-btn--other">Randomly increase one Quality</button>
+          <button class="op-btn op-btn--other">Randomly increase two Qualities and reduce one</button>
+        </div>
+        
+        <div class="op-group">
+          <button class="op-btn op-btn--green">Reroll Quality for Green Emblems</button>
+        </div>
+        
+        <div class="op-group">
+          <button class="op-btn op-btn--red">Reroll Quality for Red Emblems</button>
+          <button class="op-btn op-btn--red">Reroll Quality for the first Red Emblem</button>
+          <button class="op-btn op-btn--red">Reroll Quality for the last Red Emblem</button>
+          <button class="op-btn op-btn--red">Reroll Quality for one random Red Emblem</button>
+        </div>
+        
+        <div class="op-group">
+          <button class="op-btn op-btn--blue">Reroll Quality for Blue Emblems</button>
+        </div>
+      </div>
+      
+      <div class="op-content" data-content="trait">
+        <div class="op-group">
+          <button class="op-btn op-btn--green">Reroll Trait for Green Emblems</button>
+        </div>
+        
+        <div class="op-group">
+          <button class="op-btn op-btn--red">Reroll Trait for Red Emblems</button>
+        </div>
+        
+        <div class="op-group">
+          <button class="op-btn op-btn--blue">Reroll Trait for Blue Emblems</button>
+          <button class="op-btn op-btn--blue">Reroll Trait for the first Blue Emblem</button>
+          <button class="op-btn op-btn--blue">Reroll Trait for the last Blue Emblem</button>
+          <button class="op-btn op-btn--blue">Reroll Trait for one random Blue Emblem</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
