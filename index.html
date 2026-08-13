@@ -3,14 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dota 2 Fantasy</title>
+  <title>Dota 2 Fantasy Calculator</title>
 </head>
 <body data-active-stage="groupStage">
 
-  <!-- STAGE SELECTOR -->
-  <header class="stage-selector">
-    <button class="stage-btn active" data-stage="groupStage">Group Stage</button>
-    <button class="stage-btn" data-stage="mainStage">Main Stage</button>
+  <header class="page-header">
+    <h1 class="site-title">
+      <span class="site-title__brand">Dota 2</span>
+      <span class="site-title__tagline">Fantasy Calculator</span>
+    </h1>
+
+    <nav class="stage-selector" aria-label="Tournament stage">
+      <button class="stage-btn active" data-stage="groupStage">Group Stage</button>
+      <button class="stage-btn" data-stage="mainStage">Main Stage</button>
+    </nav>
   </header>
 
   <main class="dashboard">
