@@ -54,9 +54,13 @@
   --font-attribute-size: 0.7rem;
   --font-total-size: 1.1rem;
   --font-row-size: 0.61rem;
+  --font-quality-trait-size: 0.65rem;
+  --font-quality-trait-value-size: 0.72rem;
   --weight-attribute: 800;
   --weight-total: 800;
   --weight-row: 550;
+  --weight-quality-trait: 650;
+  --weight-quality-trait-value: 700;
 
   /* Dropdowns */
   --space-dropdown-arrow: 0.25rem;
@@ -385,7 +389,8 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: var(--font-row-size);
+  gap: 0.35rem;
+  font-size: var(--font-quality-trait-size);
   color: var(--emblem-row);
   padding: 0 var(--space-row-sides);
 }
@@ -399,7 +404,9 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
 }
 
 .emblem-row .value {
-  font-weight: var(--weight-row);
+  flex-shrink: 0;
+  font-size: var(--font-quality-trait-value-size);
+  font-weight: var(--weight-quality-trait-value);
   color: var(--emblem-value);
 }
 
@@ -477,17 +484,18 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
 /* ── 10. Dropdown — Quality and Trait ─────────────────────────────────────── */
 
 .emblem-row .select-wrap {
-  --dropdown-arrow-color: var(--emblem-row);
-  --dropdown-focus-color: var(--emblem-row);
+  --dropdown-arrow-color: var(--emblem-value);
+  --dropdown-focus-color: var(--emblem-value);
+  min-width: 0;
 }
 
 .quality-select,
 .trait-select {
-  font-size: var(--font-row-size);
-  font-weight: var(--weight-row);
+  font-size: var(--font-quality-trait-size);
+  font-weight: var(--weight-quality-trait);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--emblem-row);
+  color: var(--emblem-value);
 }
 
 
@@ -529,7 +537,8 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
     --role-title-size: 1.8rem;
     --font-total-size: 1.15rem;
     --font-attribute-size: 0.74rem;
-    --font-row-size: 0.64rem;
+    --font-quality-trait-size: 0.67rem;
+    --font-quality-trait-value-size: 0.74rem;
     --banner-padding-sides: 0.7rem;
     --space-page: 2.5rem;
   }
@@ -551,7 +560,8 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
     --role-title-size: 1.95rem;
     --font-total-size: 1.2rem;
     --font-attribute-size: 0.78rem;
-    --font-row-size: 0.67rem;
+    --font-quality-trait-size: 0.69rem;
+    --font-quality-trait-value-size: 0.76rem;
     --banner-padding-top: 0.85rem;
     --banner-padding-bottom: 2.75rem;
     --banner-tip-height: 32px;
