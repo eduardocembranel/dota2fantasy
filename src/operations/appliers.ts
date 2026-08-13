@@ -6,6 +6,7 @@ import type {
   Operation,
   OperationApplier,
   Quality,
+  SkipReason,
   Trait,
 } from '../types';
 
@@ -47,7 +48,7 @@ function getEligibleEmblemIndicesForQualityIncrease(input: ApplyOperationInput):
 function applyRandomlyIncreaseOneQuality(input: ApplyOperationInput): ApplyOperationResult {
   const emblemIndex = pickRandomItem(getEligibleEmblemIndicesForQualityIncrease(input));
   if (emblemIndex === undefined) {
-    return { status: 'skipped', reason: 'There are no emblems eligible to be increased' };
+    return { status: 'skipped', reason: 'noEligibleEmblems' };
   }
 
   const nextQuality = pickRandomHigherQuality(input.banner.emblems[emblemIndex].quality);
@@ -89,7 +90,7 @@ function applyRandomlyIncreaseTwoQualitiesAndReduceOne(
   );
 
   if (candidatesToIncrease.length < 2) {
-    return { status: 'skipped', reason: 'There are less than 2 emblems eligible to be increased' };
+    return { status: 'skipped', reason: 'lessThanTwoEligibleEmblems' };
   }
 
   let indicesToIncrease: number[];
@@ -148,8 +149,12 @@ const ALL_TRAITS: Trait[] = ['fractal', 'friendly', 'benevolent', 'vampiric', 'u
 type EmblemRerollSelection = 'all' | 'first' | 'last' | 'random';
 
 interface EmblemRerollTarget {
-  color: EmblemColor;
+  color: Exclude<EmblemColor, 'unknown'>;
   selection: EmblemRerollSelection;
+}
+
+function skipNoColorEmblems(color: EmblemColor): SkipReason {
+  return { type: 'noColorEmblemsToReroll', color: color as Exclude<EmblemColor, 'unknown'> };
 }
 
 function getEmblemIndicesForReroll(
@@ -193,7 +198,7 @@ function applyRerollQuality(
   if (emblemIndices.length === 0) {
     return {
       status: 'skipped',
-      reason: `No ${target.color} emblems to reroll`,
+      reason: skipNoColorEmblems(target.color),
     };
   }
 
@@ -220,7 +225,7 @@ function applyRerollTrait(
   if (emblemIndices.length === 0) {
     return {
       status: 'skipped',
-      reason: `No ${target.color} emblems to reroll`,
+      reason: skipNoColorEmblems(target.color),
     };
   }
 

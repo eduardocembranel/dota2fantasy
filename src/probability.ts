@@ -13,6 +13,7 @@ import type {
   OperationOutcome,
   OperationSimulationResult,
   Role,
+  SkipReason,
   Stage,
 } from './types';
 
@@ -137,7 +138,7 @@ function summarizeSimulationOutcomes(
 }
 
 type RunSimulationsResult =
-  | { status: 'skipped'; reason: string }
+  | { status: 'skipped'; reason: SkipReason }
   | { status: 'simulated'; banners: Banner[] };
 
 function runSimulations(input: ApplyOperationInput): RunSimulationsResult {

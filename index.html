@@ -7,6 +7,11 @@
 </head>
 <body data-active-stage="groupStage">
 
+  <div class="lang-switcher" role="group" aria-label="Language">
+    <button type="button" class="lang-btn lang-btn--active" data-lang="en" title="English" aria-label="English" aria-pressed="true">🇬🇧</button>
+    <button type="button" class="lang-btn" data-lang="pt" title="Português" aria-label="Português" aria-pressed="false">🇧🇷</button>
+  </div>
+
   <header class="page-header">
     <h1 class="site-title">
       <span class="site-title__brand">Dota 2</span>
@@ -23,7 +28,7 @@
 
     <!-- CORE -->
     <section class="column">
-      <h2 class="role-title">Core</h2>
+      <h2 class="role-title" data-role="core">Core</h2>
       <div class="column-banner">
         <article class="emblem emblem--red">
           <div class="emblem-header">
@@ -199,7 +204,7 @@
 
     <!-- MID -->
     <section class="column">
-      <h2 class="role-title">Mid</h2>
+      <h2 class="role-title" data-role="mid">Mid</h2>
       <div class="column-banner">
         <article class="emblem emblem--red">
           <div class="emblem-header">
@@ -375,7 +380,7 @@
 
     <!-- SUPPORT -->
     <section class="column">
-      <h2 class="role-title">Support</h2>
+      <h2 class="role-title" data-role="support">Support</h2>
       <div class="column-banner">
         <article class="emblem emblem--blue">
           <div class="emblem-header">

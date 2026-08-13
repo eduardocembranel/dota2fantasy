@@ -1,5 +1,10 @@
 export type EmblemColor = 'red' | 'green' | 'blue' | 'unknown';
 
+export type SkipReason =
+  | 'noEligibleEmblems'
+  | 'lessThanTwoEligibleEmblems'
+  | { type: 'noColorEmblemsToReroll'; color: Exclude<EmblemColor, 'unknown'> };
+
 export type Stage = 'groupStage' | 'mainStage';
 
 export type OperationCategory = 'stats' | 'quality' | 'trait';
@@ -221,7 +226,7 @@ export type BannerOperationSummary =
     }
   | {
       status: 'skipped';
-      reason: string;
+      reason: SkipReason;
     };
 
 export interface OperationSimulationResult {
@@ -248,7 +253,7 @@ export interface ApplyOperationInput {
 
 export type ApplyOperationResult =
   | { status: 'applied'; banner: Banner }
-  | { status: 'skipped'; reason: string };
+  | { status: 'skipped'; reason: SkipReason };
 
 export type OperationApplier = (input: ApplyOperationInput) => ApplyOperationResult;
 

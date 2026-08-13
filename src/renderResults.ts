@@ -1,4 +1,9 @@
-import { OPERATION_LABELS } from './types';
+import {
+  getOperationLabel,
+  getRoleLabel,
+  getSimCopy,
+  getSkipReasonText,
+} from './i18n';
 import type {
   BannerOperationSummary,
   Operation,
@@ -9,12 +14,6 @@ import type {
 } from './types';
 
 const ROLES: Role[] = ['core', 'mid', 'support'];
-
-const ROLE_LABELS: Record<Role, string> = {
-  core: 'Core',
-  mid: 'Mid',
-  support: 'Support',
-};
 
 function formatSignedPercent(value: number): string {
   const rounded = Math.round(value * 10) / 10;
@@ -31,6 +30,13 @@ function formatChance(value: number): string {
   return `${Math.round(value * 100)}%`;
 }
 
+function interpolate(template: string, params: Record<string, string>): string {
+  return Object.entries(params).reduce(
+    (text, [key, value]) => text.replaceAll(`{${key}}`, value),
+    template
+  );
+}
+
 function getPrimaryOutcome(
   summary: Extract<BannerOperationSummary, { status: 'simulated' }>,
   category: OperationCategory
@@ -44,14 +50,14 @@ function getPrimaryOutcome(
   return summary.emblemTotalOutcome;
 }
 
-function getPrimaryLabel(category: OperationCategory): string {
+function getPrimaryMetricKey(category: OperationCategory): 'quality' | 'trait' | 'bannerTotal' {
   if (category === 'quality') {
-    return 'Quality';
+    return 'quality';
   }
   if (category === 'trait') {
-    return 'Trait';
+    return 'trait';
   }
-  return 'Banner total';
+  return 'bannerTotal';
 }
 
 function findBestRole(
@@ -92,6 +98,8 @@ function outcomeClass(value: number): string {
 }
 
 function renderProbabilityBar(outcome: OperationOutcome, chancesLabel: string): string {
+  const sim = getSimCopy();
+
   return `
     <section class="sim-chances">
       <p class="sim-chances__label">${chancesLabel}</p>
@@ -101,25 +109,27 @@ function renderProbabilityBar(outcome: OperationOutcome, chancesLabel: string): 
         <span class="sim-prob-bar__segment sim-prob-bar__segment--worsen" style="width: ${outcome.worsenChance * 100}%"></span>
       </div>
       <p class="sim-prob-legend">
-        <span>Improve ${formatChance(outcome.improveChance)}</span>
-        <span>Neutral ${formatChance(outcome.neutralChance)}</span>
-        <span>Worsen ${formatChance(outcome.worsenChance)}</span>
+        <span>${sim.improve} ${formatChance(outcome.improveChance)}</span>
+        <span>${sim.neutral} ${formatChance(outcome.neutralChance)}</span>
+        <span>${sim.worsen} ${formatChance(outcome.worsenChance)}</span>
       </p>
     </section>
   `;
 }
 
 function renderOutcomeDetails(label: string, outcome: OperationOutcome): string {
+  const sim = getSimCopy();
+
   return `
     <div class="sim-detail-block">
       <h4 class="sim-detail-label">${label}</h4>
       <dl class="sim-detail-grid">
-        <div><dt>Expected change</dt><dd>${formatSignedPercent(outcome.expectedOutcome)}</dd></div>
-        <div><dt>Improve chance</dt><dd>${formatChance(outcome.improveChance)}</dd></div>
-        <div><dt>Worsen chance</dt><dd>${formatChance(outcome.worsenChance)}</dd></div>
-        <div><dt>Neutral chance</dt><dd>${formatChance(outcome.neutralChance)}</dd></div>
-        <div><dt>Avg on improve</dt><dd>${formatSignedPercent(outcome.avgImprove)}</dd></div>
-        <div><dt>Avg on worsen</dt><dd>${formatSignedPercent(outcome.avgWorsen)}</dd></div>
+        <div><dt>${sim.expectedChange}</dt><dd>${formatSignedPercent(outcome.expectedOutcome)}</dd></div>
+        <div><dt>${sim.improveChance}</dt><dd>${formatChance(outcome.improveChance)}</dd></div>
+        <div><dt>${sim.worsenChance}</dt><dd>${formatChance(outcome.worsenChance)}</dd></div>
+        <div><dt>${sim.neutralChance}</dt><dd>${formatChance(outcome.neutralChance)}</dd></div>
+        <div><dt>${sim.avgOnImprove}</dt><dd>${formatSignedPercent(outcome.avgImprove)}</dd></div>
+        <div><dt>${sim.avgOnWorsen}</dt><dd>${formatSignedPercent(outcome.avgWorsen)}</dd></div>
       </dl>
     </div>
   `;
@@ -129,10 +139,11 @@ function getDetailBlocks(
   summary: Extract<BannerOperationSummary, { status: 'simulated' }>,
   category: OperationCategory
 ): string[] {
-  const totalBlock = renderOutcomeDetails('Total banner', summary.emblemTotalOutcome);
+  const sim = getSimCopy();
+  const totalBlock = renderOutcomeDetails(sim.totalBanner, summary.emblemTotalOutcome);
 
   if (category === 'quality') {
-    return [renderOutcomeDetails('Trait', summary.traitOutcome), totalBlock];
+    return [renderOutcomeDetails(sim.trait, summary.traitOutcome), totalBlock];
   }
 
   return [totalBlock];
@@ -144,7 +155,8 @@ function renderCard(
   category: OperationCategory,
   isBest: boolean
 ): string {
-  const roleLabel = ROLE_LABELS[role];
+  const sim = getSimCopy();
+  const roleLabel = getRoleLabel(role);
 
   if (summary.status === 'skipped') {
     return `
@@ -152,13 +164,14 @@ function renderCard(
         <header class="sim-card__header">
           <h3 class="sim-card__role">${roleLabel}</h3>
         </header>
-        <p class="sim-card__skipped">${summary.reason}</p>
+        <p class="sim-card__skipped">${getSkipReasonText(summary.reason)}</p>
       </article>
     `;
   }
 
   const primary = getPrimaryOutcome(summary, category);
-  const primaryLabel = getPrimaryLabel(category);
+  const primaryMetricKey = getPrimaryMetricKey(category);
+  const primaryMetricLabel = sim[primaryMetricKey];
   const detailsId = `sim-details-${role}`;
   const categoryClass = `sim-card--${category}`;
   const detailBlocks = getDetailBlocks(summary, category);
@@ -167,37 +180,40 @@ function renderCard(
     <article class="sim-card ${categoryClass}${isBest ? ' sim-card--best' : ''}">
       <header class="sim-card__header">
         <h3 class="sim-card__role">${roleLabel}</h3>
-        ${isBest ? '<span class="sim-card__badge">Best pick</span>' : ''}
+        ${isBest ? `<span class="sim-card__badge">${sim.bestPick}</span>` : ''}
       </header>
 
       <section class="sim-primary">
-        <p class="sim-primary__label">Expected ${primaryLabel.toLowerCase()} bonus change</p>
+        <p class="sim-primary__label">${interpolate(sim.expectedBonusChange, { metric: primaryMetricLabel })}</p>
         <p class="sim-primary__value ${outcomeClass(primary.expectedOutcome)}">${formatSignedPercent(primary.expectedOutcome)}</p>
         <div class="sim-avg-pair">
           <div class="sim-avg sim-avg--improve">
-            <span class="sim-avg__label">Avg on improve</span>
+            <span class="sim-avg__label">${sim.avgOnImprove}</span>
             <span class="sim-avg__value">${formatSignedPercent(primary.avgImprove)}</span>
           </div>
           <div class="sim-avg sim-avg--worsen">
-            <span class="sim-avg__label">Avg on worsen</span>
+            <span class="sim-avg__label">${sim.avgOnWorsen}</span>
             <span class="sim-avg__value">${formatSignedPercent(primary.avgWorsen)}</span>
           </div>
         </div>
       </section>
 
-      ${renderProbabilityBar(primary, `${primaryLabel} outcome chances`)}
+      ${renderProbabilityBar(
+        primary,
+        interpolate(sim.outcomeChances, { metric: primaryMetricLabel })
+      )}
 
       ${
         category !== 'stats'
           ? `
       <div class="sim-secondary">
-        <span class="sim-secondary__label">Total banner change</span>
+        <span class="sim-secondary__label">${sim.totalBannerChange}</span>
         <span class="sim-secondary__value ${outcomeClass(summary.emblemTotalOutcome.expectedOutcome)}">${formatSignedPercent(summary.emblemTotalOutcome.expectedOutcome)}</span>
       </div>`
           : ''
       }
 
-      <button class="sim-details-toggle" type="button" aria-expanded="false" aria-controls="${detailsId}">More breakdown</button>
+      <button class="sim-details-toggle" type="button" aria-expanded="false" aria-controls="${detailsId}" data-label-more="${sim.moreBreakdown}" data-label-hide="${sim.hideBreakdown}">${sim.moreBreakdown}</button>
       <div class="sim-details" id="${detailsId}" hidden>
         ${detailBlocks.join('')}
       </div>
@@ -212,21 +228,22 @@ export function renderSimulationResults(
   result: OperationSimulationResult,
   ignoreFractalBonus: boolean
 ): void {
+  const sim = getSimCopy();
   const bestRole = findBestRole(result.simulationResults, category);
 
   container.innerHTML = `
     <section class="sim-results">
       <header class="sim-results__header">
         <div class="sim-results__intro">
-          <p class="sim-results__eyebrow">Simulation Results</p>
-          <h2 class="sim-results__operation">${OPERATION_LABELS[operation]}</h2>
+          <p class="sim-results__eyebrow">${sim.resultsEyebrow}</p>
+          <h2 class="sim-results__operation">${getOperationLabel(operation)}</h2>
           ${
             ignoreFractalBonus
-              ? '<p class="sim-results__notice">Fractal own bonus treated as 0% in these results</p>'
+              ? `<p class="sim-results__notice">${sim.fractalNotice}</p>`
               : ''
           }
         </div>
-        <p class="sim-results__meta">${result.numSimulations.toLocaleString()} simulations</p>
+        <p class="sim-results__meta">${result.numSimulations.toLocaleString()} ${sim.simulations}</p>
       </header>
       <div class="sim-results__grid">
         ${ROLES.map((role) =>
@@ -247,7 +264,9 @@ export function renderSimulationResults(
       const isOpen = !panel.hidden;
       panel.hidden = isOpen;
       button.setAttribute('aria-expanded', String(!isOpen));
-      button.textContent = isOpen ? 'More breakdown' : 'Hide breakdown';
+      const moreLabel = button.getAttribute('data-label-more') ?? sim.moreBreakdown;
+      const hideLabel = button.getAttribute('data-label-hide') ?? sim.hideBreakdown;
+      button.textContent = isOpen ? moreLabel : hideLabel;
     });
   });
 }

@@ -1,4 +1,4 @@
-import { calculateOperationOutcome } from './probability';
+import { initI18n, registerSimulationRerender } from './applyI18n';
 import { renderSimulationResults } from './renderResults';
 import {
   formatBonusPercent,
@@ -7,6 +7,12 @@ import {
   getQualityBonusPercent,
   getTraitBonusPercent,
 } from './bannerScore';
+import {
+  BLUE_ATTRIBUTES,
+  GREEN_ATTRIBUTES,
+  RED_ATTRIBUTES,
+} from './i18n';
+import { calculateOperationOutcome } from './probability';
 import type {
   AppState,
   Attribute,
@@ -42,8 +48,13 @@ export function readEmblem(emblemEl: HTMLElement) {
   };
 }
 
-export function parseQuality(qualityLabel: string): Quality {
-  const roman = qualityLabel.replace(/^Tier\s+/i, '').trim();
+export function parseQuality(qualityValue: string): Quality {
+  const tier = Number(qualityValue);
+  if (tier >= 1 && tier <= 5) {
+    return tier as Quality;
+  }
+
+  const roman = qualityValue.replace(/^(Tier|Nível)\s+/i, '').trim();
   const map: Record<string, Quality> = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
   return map[roman] ?? 1;
 }
@@ -56,8 +67,13 @@ const TRAIT_LABEL_TO_TYPE: Record<string, Trait> = {
   Unique: 'unique',
 };
 
-export function parseTrait(traitLabel: string): Trait {
-  return TRAIT_LABEL_TO_TYPE[traitLabel] ?? 'fractal';
+const TRAIT_VALUES: Trait[] = ['fractal', 'friendly', 'benevolent', 'vampiric', 'unique'];
+
+export function parseTrait(traitValue: string): Trait {
+  if ((TRAIT_VALUES as string[]).includes(traitValue)) {
+    return traitValue as Trait;
+  }
+  return TRAIT_LABEL_TO_TYPE[traitValue] ?? 'fractal';
 }
 
 const ATTRIBUTE_LABEL_TO_TYPE: Record<string, Attribute> = {
@@ -81,8 +97,17 @@ const ATTRIBUTE_LABEL_TO_TYPE: Record<string, Attribute> = {
   'Smokes Used': 'smokesUsed',
 };
 
-export function parseAttribute(attributeLabel: string): Attribute {
-  return ATTRIBUTE_LABEL_TO_TYPE[attributeLabel] ?? 'towers';
+const ALL_ATTRIBUTE_VALUES: Attribute[] = [
+  ...RED_ATTRIBUTES,
+  ...GREEN_ATTRIBUTES,
+  ...BLUE_ATTRIBUTES,
+];
+
+export function parseAttribute(attributeValue: string): Attribute {
+  if ((ALL_ATTRIBUTE_VALUES as string[]).includes(attributeValue)) {
+    return attributeValue as Attribute;
+  }
+  return ATTRIBUTE_LABEL_TO_TYPE[attributeValue] ?? 'towers';
 }
 
 export function parseRole(roleLabel: string): Role {
@@ -132,7 +157,11 @@ export function getEmblemColor(emblemEl: HTMLElement): EmblemColor {
 
 export function readBanner(columnEl: HTMLElement): Banner {
   const roleTitle = columnEl.querySelector('.role-title');
-  const role = parseRole(roleTitle?.textContent ?? 'core');
+  const roleFromData = roleTitle?.getAttribute('data-role');
+  const role =
+    roleFromData === 'core' || roleFromData === 'mid' || roleFromData === 'support'
+      ? roleFromData
+      : parseRole(roleTitle?.textContent ?? 'core');
   const emblems = [...columnEl.querySelectorAll<HTMLElement>('.emblem')].map(
     (emblemEl, index) => ({
       index,
@@ -365,6 +394,7 @@ function initFractalToggle() {
 }
 
 export function initApp() {
+  initI18n();
   syncAllEmblemDisplays();
   refreshAppState();
   initEmblemListeners();
@@ -372,5 +402,6 @@ export function initApp() {
   initOperationsTabs();
   initStageSelector();
   initFractalToggle();
+  registerSimulationRerender(rerunLastSimulation);
   logAppState();
 }
