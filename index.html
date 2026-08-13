@@ -8,8 +8,21 @@
 <body data-active-stage="groupStage">
 
   <div class="lang-switcher" role="group" aria-label="Language">
-    <button type="button" class="lang-btn lang-btn--active" data-lang="en" title="English" aria-label="English" aria-pressed="true">🇬🇧</button>
-    <button type="button" class="lang-btn" data-lang="pt" title="Português" aria-label="Português" aria-pressed="false">🇧🇷</button>
+    <button type="button" class="lang-btn lang-btn--active" data-lang="en" title="English" aria-label="English" aria-pressed="true">
+      <svg class="lang-btn__flag" viewBox="0 0 60 40" aria-hidden="true" focusable="false">
+        <rect width="60" height="40" fill="#fff"/>
+        <rect x="26" width="8" height="40" fill="#ce1124"/>
+        <rect y="16" width="60" height="8" fill="#ce1124"/>
+      </svg>
+    </button>
+    <button type="button" class="lang-btn" data-lang="pt" title="Português" aria-label="Português" aria-pressed="false">
+      <svg class="lang-btn__flag" viewBox="0 0 60 40" aria-hidden="true" focusable="false">
+        <rect width="60" height="40" fill="#009b3a"/>
+        <polygon points="30,4 56,20 30,36 4,20" fill="#fedf00"/>
+        <circle cx="30" cy="20" r="8" fill="#002776"/>
+        <path fill="#fff" d="M22 18.5c2.2-3.2 6.8-4.2 10.2-2.2 1.2.7 2.1 1.8 2.7 3.1-2.4-1.2-5.4-.8-7.4 1.2-1.2 1.2-1.8 2.8-1.9 4.4-.6-2.2-2-4.2-4-5.5z"/>
+      </svg>
+    </button>
   </div>
 
   <header class="page-header">

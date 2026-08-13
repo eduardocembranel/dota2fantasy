@@ -178,16 +178,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.35rem;
+  height: 2.35rem;
   padding: 0;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
-  font-size: 1.15rem;
-  line-height: 1;
+  line-height: 0;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.lang-btn__flag {
+  width: 1.4rem;
+  height: auto;
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
 }
 
 .lang-btn:hover {
