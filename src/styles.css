@@ -756,6 +756,15 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
   display: grid;
 }
 
+/* Stats / Qualities / Traits: três colunas alinhadas (verde / vermelho / azul) */
+@media (min-width: 901px) {
+  .op-content[data-content='stats'],
+  .op-content[data-content='quality'],
+  .op-content[data-content='trait'] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .op-group {
   display: flex;
   flex-direction: column;
