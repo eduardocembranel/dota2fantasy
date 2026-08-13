@@ -157,6 +157,10 @@
   padding: 0;
 }
 
+html {
+  overflow-x: clip;
+}
+
 
 /* ── 3.0 Language switcher ──────────────────────────────────────────────── */
 
@@ -213,6 +217,7 @@
 body {
   min-height: 100vh;
   position: relative;
+  overflow-x: clip;
   background:
     radial-gradient(ellipse at 50% 0%, var(--page-bg-accent) 0%, var(--page-bg) 70%);
   color: var(--page-text);
@@ -656,9 +661,149 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
   }
 
   .column {
-    max-width: 400px;
+    max-width: min(400px, 100%);
     margin: 0 auto;
     width: 100%;
+  }
+
+  .op-content,
+  .op-group--full-width {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding:
+      clamp(1rem, 2.5vh, 1.5rem)
+      0.75rem;
+    gap: 1.25rem;
+  }
+
+  .page-header,
+  .dashboard,
+  .global-operations {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .site-title__brand {
+    letter-spacing: 0.1em;
+  }
+
+  .site-title__tagline {
+    letter-spacing: 0.1em;
+    font-size: 0.72rem;
+    padding-inline: 0.25rem;
+  }
+
+  .stage-selector {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .stage-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.78rem;
+  }
+
+  .operations-panel,
+  .sim-results {
+    padding: 0.75rem 0.85rem 0.9rem;
+    border-radius: 4px;
+  }
+
+  .panel-title {
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+  }
+
+  .fractal-toggle {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    row-gap: 0.35rem;
+    padding-inline: 0.25rem;
+  }
+
+  .fractal-toggle__label {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    max-width: 18rem;
+  }
+
+  .op-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .op-tab-btn {
+    font-size: 0.78rem;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .op-btn {
+    font-size: 0.74rem;
+    padding: 0.65rem 0.65rem;
+    word-break: break-word;
+  }
+
+  .sim-results__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .sim-results__eyebrow {
+    font-size: 0.92rem;
+    letter-spacing: 0.07em;
+  }
+
+  .sim-results__meta {
+    align-self: flex-start;
+  }
+
+  .sim-avg-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .sim-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lang-switcher {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem;
+  }
+
+  .lang-btn {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  .lang-btn__flag {
+    width: 1.25rem;
+  }
+
+  .emblem-row {
+    flex-wrap: wrap;
+    row-gap: 0.2rem;
+  }
+
+  .emblem-row .select-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .emblem-row .value {
+    margin-left: auto;
   }
 }
 
@@ -817,10 +962,10 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
 
 .op-content {
   display: none;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 1.25rem;
   align-items: start;
-  justify-content: center; /* Centers the grid on ultra-wide screens when there are fewer columns */
+  justify-content: center;
 }
 
 .op-content.active {
@@ -845,9 +990,9 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
 .op-group--full-width {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 0.5rem;
-  margin-bottom: -0.25rem; /* Reduced space to bring lower groups closer */
+  margin-bottom: -0.25rem;
 }
 
 /* Removed .op-group-title and .op-dot rules */
@@ -1271,7 +1416,8 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
   color: var(--text-on-parchment);
 }
 
-@media (max-width: 900px) {
+/* Sim results: empilha cards em telas estreitas (deve vir após .sim-results__grid) */
+@media (max-width: 1000px) {
   .sim-results__grid {
     grid-template-columns: 1fr;
   }
@@ -1280,4 +1426,3 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
     order: -1;
   }
 }
-
