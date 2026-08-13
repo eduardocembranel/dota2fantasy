@@ -591,8 +591,12 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
     font-size: 1.22rem;
   }
 
+  .sim-results__eyebrow {
+    font-size: 1.12rem;
+  }
+
   .sim-results__operation {
-    font-size: 1.1rem;
+    font-size: 0.96rem;
   }
 }
 
@@ -922,19 +926,19 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
 }
 
 .sim-results__eyebrow {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-on-parchment-muted);
+  color: #6b4f1d;
 }
 
 .sim-results__operation {
-  margin-top: 0.25rem;
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1.3;
-  color: var(--text-on-parchment);
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.35;
+  color: var(--text-on-parchment-muted);
 }
 
 .sim-results__notice {
