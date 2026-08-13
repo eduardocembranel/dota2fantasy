@@ -10,15 +10,12 @@ import {
   parseTrait,
   parseAttribute,
   parseRole,
+  parseOperation,
   readBanner,
   readEmblem,
   refreshAppState,
 } from './app';
-import {
-  calculateExpectedOutcome,
-  calculateOperationProbability,
-  resolveOperationRules,
-} from './probability';
+import { calculateOperationOutcome } from './probability';
 
 initApp();
 
@@ -35,7 +32,6 @@ window.dotaFantasy = {
   parseTrait,
   parseAttribute,
   parseRole,
-  calculateExpectedOutcome,
-  calculateOperationProbability,
-  resolveOperationRules,
+  parseOperation,
+  calculateOperationOutcome,
 };

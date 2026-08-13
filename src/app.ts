@@ -1,9 +1,18 @@
-import { calculateOperationProbability } from './probability';
+import { calculateOperationOutcome } from './probability';
+import { renderSimulationResults } from './renderResults';
+import {
+  formatBonusPercent,
+  formatTotalPercent,
+  getEmblemTotalPercent,
+  getQualityBonusPercent,
+  getTraitBonusPercent,
+} from './bannerScore';
 import type {
   AppState,
   Attribute,
   Banner,
   EmblemColor,
+  Operation,
   OperationCategory,
   Quality,
   Role,
@@ -84,6 +93,36 @@ export function parseRole(roleLabel: string): Role {
   return 'core';
 }
 
+const OPERATION_IDS = [
+  'rerollStatForGreenEmblems',
+  'rerollStatForFirstGreenEmblem',
+  'rerollStatForLastGreenEmblem',
+  'rerollStatForRandomGreenEmblem',
+  'rerollStatForRedEmblems',
+  'rerollStatForBlueEmblems',
+  'randomlyIncreaseOneQuality',
+  'randomlyIncreaseTwoQualitiesAndReduceOne',
+  'rerollQualityForGreenEmblems',
+  'rerollQualityForRedEmblems',
+  'rerollQualityForFirstRedEmblem',
+  'rerollQualityForLastRedEmblem',
+  'rerollQualityForRandomRedEmblem',
+  'rerollQualityForBlueEmblems',
+  'rerollTraitForGreenEmblems',
+  'rerollTraitForRedEmblems',
+  'rerollTraitForBlueEmblems',
+  'rerollTraitForFirstBlueEmblem',
+  'rerollTraitForLastBlueEmblem',
+  'rerollTraitForRandomBlueEmblem',
+] as const satisfies readonly Operation[];
+
+export function parseOperation(operationId: string): Operation {
+  if ((OPERATION_IDS as readonly string[]).includes(operationId)) {
+    return operationId as Operation;
+  }
+  return 'rerollStatForGreenEmblems';
+}
+
 export function getEmblemColor(emblemEl: HTMLElement): EmblemColor {
   if (emblemEl.classList.contains('emblem--red')) return 'red';
   if (emblemEl.classList.contains('emblem--green')) return 'green';
@@ -127,7 +166,59 @@ export function getAppState(): AppState {
   return refreshAppState();
 }
 
-function emitEmblemUpdated() {
+function updateEmblemDisplay(emblemEl: HTMLElement): void {
+  const columnEl = emblemEl.closest('.column');
+  if (!(columnEl instanceof HTMLElement)) {
+    return;
+  }
+
+  const banner = readBanner(columnEl);
+  const emblemIndex = [...columnEl.querySelectorAll('.emblem')].indexOf(emblemEl);
+  if (emblemIndex < 0) {
+    return;
+  }
+
+  const stage = getActiveStage();
+  const emblem = banner.emblems[emblemIndex];
+
+  const qualityBonusEl = emblemEl.querySelector('.emblem-row:has(.quality-select) .value');
+  const traitBonusEl = emblemEl.querySelector('.emblem-row:has(.trait-select) .value');
+  const totalEl = emblemEl.querySelector('.emblem-total');
+
+  if (qualityBonusEl) {
+    qualityBonusEl.textContent = formatBonusPercent(getQualityBonusPercent(emblem.quality));
+  }
+
+  if (traitBonusEl) {
+    traitBonusEl.textContent = formatBonusPercent(
+      getTraitBonusPercent(banner, emblemIndex, stage)
+    );
+  }
+
+  if (totalEl) {
+    totalEl.textContent = formatTotalPercent(
+      getEmblemTotalPercent(banner, emblemIndex, stage)
+    );
+  }
+}
+
+function syncBannerEmblemDisplays(columnEl: HTMLElement): void {
+  columnEl.querySelectorAll<HTMLElement>('.emblem').forEach(updateEmblemDisplay);
+}
+
+function syncAllEmblemDisplays(): void {
+  document.querySelectorAll<HTMLElement>('.emblem').forEach(updateEmblemDisplay);
+}
+
+function emitEmblemUpdated(event: Event): void {
+  const select = event.target;
+  if (select instanceof HTMLSelectElement) {
+    const columnEl = select.closest('.column');
+    if (columnEl instanceof HTMLElement) {
+      syncBannerEmblemDisplays(columnEl);
+    }
+  }
+
   const state = refreshAppState();
   console.log('[emblem:updated]', state);
 }
@@ -139,18 +230,55 @@ function parseOperationCategory(value: string | null): OperationCategory {
   return 'stats';
 }
 
-function emitOperationSelected(operation: string, category: OperationCategory) {
+function getIgnoreFractalBonus(): boolean {
+  const input = document.getElementById('ignore-fractal-bonus');
+  return input instanceof HTMLInputElement && input.checked;
+}
+
+let lastSelectedOperation: {
+  operation: Operation;
+  category: OperationCategory;
+  button: HTMLButtonElement;
+} | null = null;
+
+function rerunLastSimulation(): void {
+  if (!lastSelectedOperation) {
+    return;
+  }
+
+  emitOperationSelected(
+    lastSelectedOperation.operation,
+    lastSelectedOperation.category,
+    lastSelectedOperation.button
+  );
+}
+
+function emitOperationSelected(
+  operation: Operation,
+  category: OperationCategory,
+  button: HTMLButtonElement
+) {
+  lastSelectedOperation = { operation, category, button };
   const state = refreshAppState();
+  const ignoreFractalBonus = getIgnoreFractalBonus();
   const context = {
     operation,
     category,
     stage: state.stage,
     banners: state.banners,
+    ignoreFractalBonus,
   };
-  const probability = calculateOperationProbability(context);
-  const detail = { ...context, probability };
+  const outcome = calculateOperationOutcome(context);
 
-  console.log('[operation:selected]', detail);
+  document.querySelectorAll<HTMLButtonElement>('.op-btn--selected').forEach((selectedButton) => {
+    selectedButton.classList.remove('op-btn--selected');
+  });
+  button.classList.add('op-btn--selected');
+
+  const resultsContainer = document.getElementById('simulation-results');
+  if (resultsContainer) {
+    renderSimulationResults(resultsContainer, operation, category, outcome, ignoreFractalBonus);
+  }
 }
 
 export function logAppState(): AppState {
@@ -176,9 +304,9 @@ function initOperationListeners() {
     button.addEventListener('click', () => {
       const contentEl = button.closest('.op-content');
       const category = parseOperationCategory(contentEl?.getAttribute('data-content') ?? null);
-      const operation = button.textContent?.trim() ?? '';
+      const operation = parseOperation(button.getAttribute('data-operation') ?? '');
 
-      emitOperationSelected(operation, category);
+      emitOperationSelected(operation, category, button);
     });
   });
 }
@@ -221,16 +349,28 @@ function initStageSelector() {
       if (stage) {
         document.body.setAttribute('data-active-stage', stage);
       }
+      syncAllEmblemDisplays();
       refreshAppState();
     });
   });
 }
 
+function initFractalToggle() {
+  const input = document.getElementById('ignore-fractal-bonus');
+  if (!(input instanceof HTMLInputElement)) {
+    return;
+  }
+
+  input.addEventListener('change', rerunLastSimulation);
+}
+
 export function initApp() {
+  syncAllEmblemDisplays();
   refreshAppState();
   initEmblemListeners();
   initOperationListeners();
   initOperationsTabs();
   initStageSelector();
+  initFractalToggle();
   logAppState();
 }

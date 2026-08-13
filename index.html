@@ -549,6 +549,25 @@
   <section class="global-operations">
     <div class="operations-panel">
       <h2 class="panel-title">Probability Calculator</h2>
+      <label class="fractal-toggle">
+        <input type="checkbox" id="ignore-fractal-bonus" class="fractal-toggle__input" />
+        <span class="fractal-toggle__label">Ignore fractal bonus in simulation</span>
+        <span
+          class="fractal-toggle__hint"
+          tabindex="0"
+          role="button"
+          aria-label="Why ignore fractal bonus?"
+          onmousedown="event.preventDefault()"
+        >
+          ?
+          <span class="fractal-toggle__tooltip">
+            In most cases, ignoring fractal bonus gives more realistic simulation results.
+            The +60% requires all active qualities to be different — as qualities improve
+            over time, that condition usually breaks and the bonus disappears, making
+            fractal-driven gains or losses often misleading.
+          </span>
+        </span>
+      </label>
       <div class="op-tabs">
         <button class="op-tab-btn active" data-target="stats">Stats</button>
         <button class="op-tab-btn" data-target="quality">Qualities</button>
@@ -557,60 +576,61 @@
       
       <div class="op-content active" data-content="stats">
         <div class="op-group">
-          <button class="op-btn op-btn--green">Reroll Stat for Green Emblems</button>
-          <button class="op-btn op-btn--green">Reroll Stat for the first Green Emblem</button>
-          <button class="op-btn op-btn--green">Reroll Stat for the last Green Emblem</button>
-          <button class="op-btn op-btn--green">Reroll Stat for one random Green Emblem</button>
+          <button class="op-btn op-btn--green" data-operation="rerollStatForGreenEmblems">Reroll Stat for Green Emblems</button>
+          <button class="op-btn op-btn--green" data-operation="rerollStatForFirstGreenEmblem">Reroll Stat for the first Green Emblem</button>
+          <button class="op-btn op-btn--green" data-operation="rerollStatForLastGreenEmblem">Reroll Stat for the last Green Emblem</button>
+          <button class="op-btn op-btn--green" data-operation="rerollStatForRandomGreenEmblem">Reroll Stat for one random Green Emblem</button>
         </div>
         
         <div class="op-group">
-          <button class="op-btn op-btn--red">Reroll Stat for Red Emblems</button>
+          <button class="op-btn op-btn--red" data-operation="rerollStatForRedEmblems">Reroll Stat for Red Emblems</button>
         </div>
         
         <div class="op-group">
-          <button class="op-btn op-btn--blue">Reroll Stat for Blue Emblems</button>
+          <button class="op-btn op-btn--blue" data-operation="rerollStatForBlueEmblems">Reroll Stat for Blue Emblems</button>
         </div>
       </div>
       
       <div class="op-content" data-content="quality">
         <div class="op-group op-group--full-width">
-          <button class="op-btn op-btn--other">Randomly increase one Quality</button>
-          <button class="op-btn op-btn--other">Randomly increase two Qualities and reduce one</button>
+          <button class="op-btn op-btn--other" data-operation="randomlyIncreaseOneQuality">Randomly increase one Quality</button>
+          <button class="op-btn op-btn--other" data-operation="randomlyIncreaseTwoQualitiesAndReduceOne">Randomly increase two Qualities and reduce one</button>
         </div>
         
         <div class="op-group">
-          <button class="op-btn op-btn--green">Reroll Quality for Green Emblems</button>
+          <button class="op-btn op-btn--green" data-operation="rerollQualityForGreenEmblems">Reroll Quality for Green Emblems</button>
         </div>
         
         <div class="op-group">
-          <button class="op-btn op-btn--red">Reroll Quality for Red Emblems</button>
-          <button class="op-btn op-btn--red">Reroll Quality for the first Red Emblem</button>
-          <button class="op-btn op-btn--red">Reroll Quality for the last Red Emblem</button>
-          <button class="op-btn op-btn--red">Reroll Quality for one random Red Emblem</button>
+          <button class="op-btn op-btn--red" data-operation="rerollQualityForRedEmblems">Reroll Quality for Red Emblems</button>
+          <button class="op-btn op-btn--red" data-operation="rerollQualityForFirstRedEmblem">Reroll Quality for the first Red Emblem</button>
+          <button class="op-btn op-btn--red" data-operation="rerollQualityForLastRedEmblem">Reroll Quality for the last Red Emblem</button>
+          <button class="op-btn op-btn--red" data-operation="rerollQualityForRandomRedEmblem">Reroll Quality for one random Red Emblem</button>
         </div>
         
         <div class="op-group">
-          <button class="op-btn op-btn--blue">Reroll Quality for Blue Emblems</button>
+          <button class="op-btn op-btn--blue" data-operation="rerollQualityForBlueEmblems">Reroll Quality for Blue Emblems</button>
         </div>
       </div>
       
       <div class="op-content" data-content="trait">
         <div class="op-group">
-          <button class="op-btn op-btn--green">Reroll Trait for Green Emblems</button>
+          <button class="op-btn op-btn--green" data-operation="rerollTraitForGreenEmblems">Reroll Trait for Green Emblems</button>
         </div>
         
         <div class="op-group">
-          <button class="op-btn op-btn--red">Reroll Trait for Red Emblems</button>
+          <button class="op-btn op-btn--red" data-operation="rerollTraitForRedEmblems">Reroll Trait for Red Emblems</button>
         </div>
         
         <div class="op-group">
-          <button class="op-btn op-btn--blue">Reroll Trait for Blue Emblems</button>
-          <button class="op-btn op-btn--blue">Reroll Trait for the first Blue Emblem</button>
-          <button class="op-btn op-btn--blue">Reroll Trait for the last Blue Emblem</button>
-          <button class="op-btn op-btn--blue">Reroll Trait for one random Blue Emblem</button>
+          <button class="op-btn op-btn--blue" data-operation="rerollTraitForBlueEmblems">Reroll Trait for Blue Emblems</button>
+          <button class="op-btn op-btn--blue" data-operation="rerollTraitForFirstBlueEmblem">Reroll Trait for the first Blue Emblem</button>
+          <button class="op-btn op-btn--blue" data-operation="rerollTraitForLastBlueEmblem">Reroll Trait for the last Blue Emblem</button>
+          <button class="op-btn op-btn--blue" data-operation="rerollTraitForRandomBlueEmblem">Reroll Trait for one random Blue Emblem</button>
         </div>
       </div>
     </div>
+    <div id="simulation-results" class="simulation-results"></div>
   </section>
 
   <script type="module" src="/src/main.ts"></script>
