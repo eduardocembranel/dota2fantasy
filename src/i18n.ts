@@ -48,10 +48,38 @@ const ROMAN_TIERS: Record<Quality, string> = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV
 type TranslationTree = {
   pageTitle: string;
   siteTagline: string;
+  expectedScoreLabel: string;
   stageGroup: string;
   stageMain: string;
   stageNavLabel: string;
   panelTitle: string;
+  simulationSettingsTitle: string;
+  simulationSettingsDesc: string;
+  simulationSettingsSummaryIncluded: string;
+  simulationSettingsSummaryIgnored: string;
+  tabSimGeneral: string;
+  tabStatWeights: string;
+  statWeightSettingsDesc: string;
+  leaguesLabel: string;
+  leaguesLoading: string;
+  leaguesEmpty: string;
+  leagueMultiselectAll: string;
+  leagueMultiselectCount: string;
+  weightMetricLabel: string;
+  weightMetricAvg: string;
+  weightMetricTop3: string;
+  statRankPreviewTitle: string;
+  statWeightsHint: string;
+  statRankFootnote: string;
+  statRankGroupRed: string;
+  statRankGroupGreen: string;
+  statRankGroupBlue: string;
+  statRankRoleTabsAria: string;
+  tableRankHeader: string;
+  statWeightSummaryAllLeagues: string;
+  weightMetricSummaryAvg: string;
+  weightMetricSummaryTop3: string;
+  tableStatHeader: string;
   fractalToggle: string;
   fractalHintAria: string;
   fractalTooltip: string;
@@ -80,20 +108,26 @@ type TranslationTree = {
     fractalNotice: string;
     simulations: string;
     bestPick: string;
-    expectedBonusChange: string;
+    statWeightChangeLabel: string;
+    bannerScoreChangeLabel: string;
+    qualityBonusChangeLabel: string;
+    traitsBonusChangeLabel: string;
+    metricHintAria: string;
     avgOnImprove: string;
     avgOnWorsen: string;
-    outcomeChances: string;
-    totalBannerChange: string;
+    outcomeChancesAria: string;
     moreBreakdown: string;
     hideBreakdown: string;
     improve: string;
     neutral: string;
     worsen: string;
     quality: string;
-    trait: string;
+    traits: string;
     bannerTotal: string;
-    totalBanner: string;
+    statWeight: string;
+    bannerPercent: string;
+    overallScore: string;
+    overallScoreTooltip: string;
     expectedChange: string;
     improveChance: string;
     worsenChance: string;
@@ -105,10 +139,40 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
   en: {
     pageTitle: 'Dota 2 Fantasy Calculator',
     siteTagline: 'Fantasy Calculator',
+    expectedScoreLabel: 'Expected Score:',
     stageGroup: 'Group Stage',
     stageMain: 'Main Stage',
     stageNavLabel: 'Tournament stage',
     panelTitle: 'Probability Calculator',
+    simulationSettingsTitle: 'Simulation settings',
+    simulationSettingsDesc:
+      'Options that affect how operation probabilities are simulated on your banners.',
+    simulationSettingsSummaryIncluded: 'Fractal included',
+    simulationSettingsSummaryIgnored: 'Fractal ignored',
+    tabSimGeneral: 'General',
+    tabStatWeights: 'Stat weights',
+    statWeightSettingsDesc:
+      'Choose which pro matches to analyze. These filters define how strong each stat is per role, which affects stat reroll probabilities when you run an operation below.',
+    leaguesLabel: 'Leagues',
+    leaguesLoading: 'Loading leagues...',
+    leaguesEmpty: 'No leagues available',
+    leagueMultiselectAll: 'All leagues ({count})',
+    leagueMultiselectCount: '{count} leagues',
+    weightMetricLabel: 'Weight metric',
+    weightMetricAvg: 'Average',
+    weightMetricTop3: 'Top 3 scores',
+    statRankPreviewTitle: 'Ranking preview',
+    statWeightsHint: 'Rank per role (1 = strongest stat for that role)',
+    statRankFootnote: 'Based on {count} matches',
+    statRankGroupRed: 'Red',
+    statRankGroupGreen: 'Green',
+    statRankGroupBlue: 'Blue',
+    statRankRoleTabsAria: 'Role',
+    tableRankHeader: 'Rank',
+    statWeightSummaryAllLeagues: 'All leagues',
+    weightMetricSummaryAvg: 'Average',
+    weightMetricSummaryTop3: 'Top 3 scores',
+    tableStatHeader: 'Stat',
     fractalToggle: 'Ignore fractal bonus in simulation',
     fractalHintAria: 'Why ignore fractal bonus?',
     fractalTooltip:
@@ -185,20 +249,27 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
       fractalNotice: 'Fractal own bonus treated as 0% in these results',
       simulations: 'simulations',
       bestPick: 'Best pick',
-      expectedBonusChange: 'Expected {metric} bonus change',
+      statWeightChangeLabel: 'Expected Stat weight change',
+      bannerScoreChangeLabel: 'Banner score change',
+      qualityBonusChangeLabel: 'Expected quality bonus change',
+      traitsBonusChangeLabel: 'Expected traits bonus change',
+      metricHintAria: 'More about this metric',
       avgOnImprove: 'Avg on improve',
       avgOnWorsen: 'Avg on worsen',
-      outcomeChances: '{metric} outcome chances',
-      totalBannerChange: 'Total banner change',
+      outcomeChancesAria: 'Outcome distribution',
       moreBreakdown: 'More breakdown',
       hideBreakdown: 'Hide breakdown',
       improve: 'Improve',
       neutral: 'Neutral',
       worsen: 'Worsen',
       quality: 'Quality',
-      trait: 'Trait',
+      traits: 'Traits',
       bannerTotal: 'Banner total',
-      totalBanner: 'Total banner',
+      statWeight: 'Stat weight',
+      bannerPercent: 'Banner Percentage',
+      overallScore: 'Overall Banner Score',
+      overallScoreTooltip:
+        'Expected overall banner score change based on emblem bonus percentages and stat weights. For simplicity, this uses the bonus from a single match only — in practice, the score change should be doubled, since the banner sums the score from the two best matches in the series.',
       expectedChange: 'Expected change',
       improveChance: 'Improve chance',
       worsenChance: 'Worsen chance',
@@ -208,10 +279,40 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
   pt: {
     pageTitle: 'Calculadora Dota dos Sonhos',
     siteTagline: 'Calculadora Dota dos Sonhos',
+    expectedScoreLabel: 'Pontuação esperada:',
     stageGroup: 'Fase de Grupos',
     stageMain: 'Fase Principal',
     stageNavLabel: 'Fase do torneio',
     panelTitle: 'Calculadora de Probabilidade',
+    simulationSettingsTitle: 'Configurações de simulação',
+    simulationSettingsDesc:
+      'Opções que afetam como as probabilidades das operações são simuladas nos seus estandartes.',
+    simulationSettingsSummaryIncluded: 'Fractal incluído',
+    simulationSettingsSummaryIgnored: 'Fractal ignorado',
+    tabSimGeneral: 'Geral',
+    tabStatWeights: 'Peso dos atributos',
+    statWeightSettingsDesc:
+      'Escolha quais partidas profissionais analisar. Esses filtros definem o quão forte cada atributo é por role, o que afeta as probabilidades de reroll ao executar uma operação abaixo.',
+    leaguesLabel: 'Ligas',
+    leaguesLoading: 'Carregando ligas...',
+    leaguesEmpty: 'Nenhuma liga disponível',
+    leagueMultiselectAll: 'Todas as ligas ({count})',
+    leagueMultiselectCount: '{count} ligas',
+    weightMetricLabel: 'Métrica de peso',
+    weightMetricAvg: 'Média',
+    weightMetricTop3: 'Top 3 scores',
+    statRankPreviewTitle: 'Prévia do ranking',
+    statWeightsHint: 'Rank por role (1 = atributo mais forte para a role)',
+    statRankFootnote: 'Baseado em {count} partidas',
+    statRankGroupRed: 'Vermelho',
+    statRankGroupGreen: 'Verde',
+    statRankGroupBlue: 'Azul',
+    statRankRoleTabsAria: 'Role',
+    tableRankHeader: 'Rank',
+    statWeightSummaryAllLeagues: 'Todas as ligas',
+    weightMetricSummaryAvg: 'Média',
+    weightMetricSummaryTop3: 'Top 3 scores',
+    tableStatHeader: 'Atributo',
     fractalToggle: 'Ignorar bônus fractal na simulação',
     fractalHintAria: 'Por que ignorar o bônus fractal?',
     fractalTooltip:
@@ -288,20 +389,27 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
       fractalNotice: 'Bônus do fractal tratado como 0% nestes resultados',
       simulations: 'simulações',
       bestPick: 'Melhor escolha',
-      expectedBonusChange: 'Mudança esperada no bônus de {metric}',
+      statWeightChangeLabel: 'Mudança esperada no peso dos atributos',
+      bannerScoreChangeLabel: 'Mudança na pontuação',
+      qualityBonusChangeLabel: 'Mudança esperada no bônus de qualidade',
+      traitsBonusChangeLabel: 'Mudança esperada no bônus de traços',
+      metricHintAria: 'Mais sobre esta métrica',
       avgOnImprove: 'Média ao melhorar',
       avgOnWorsen: 'Média ao piorar',
-      outcomeChances: 'Chances de resultado de {metric}',
-      totalBannerChange: 'Mudança total do estandarte',
+      outcomeChancesAria: 'Distribuição de resultados',
       moreBreakdown: 'Mais detalhes',
       hideBreakdown: 'Ocultar detalhes',
       improve: 'Melhora',
       neutral: 'Neutro',
       worsen: 'Piora',
       quality: 'Qualidade',
-      trait: 'Traço',
+      traits: 'Traços',
       bannerTotal: 'Total do estandarte',
-      totalBanner: 'Total do estandarte',
+      statWeight: 'Peso dos atributos',
+      bannerPercent: 'Percentual do estandarte',
+      overallScore: 'Pontuação geral do estandarte',
+      overallScoreTooltip:
+        'Mudança esperada na pontuação geral do estandarte, baseada nos percentuais de bônus dos emblemas e nos pesos dos atributos. Para simplificar, considera apenas o bônus de uma partida — na prática, essa mudança de pontuação deve ser dobrada, pois o estandarte soma a pontuação das duas melhores partidas da série.',
       expectedChange: 'Mudança esperada',
       improveChance: 'Chance de melhorar',
       worsenChance: 'Chance de piorar',

@@ -1,7 +1,13 @@
 import { getActiveEmblemCount } from '../bannerScore';
+import {
+  BLUE_ATTRIBUTES,
+  GREEN_ATTRIBUTES,
+  RED_ATTRIBUTES,
+} from '../i18n';
 import type {
   ApplyOperationInput,
   ApplyOperationResult,
+  Attribute,
   EmblemColor,
   Operation,
   OperationApplier,
@@ -9,11 +15,6 @@ import type {
   SkipReason,
   Trait,
 } from '../types';
-
-const unimplemented: OperationApplier = (input) => ({
-  status: 'applied',
-  banner: input.banner,
-});
 
 function pickRandomItem<T>(items: T[]): T | undefined {
   if (items.length === 0) {
@@ -146,6 +147,12 @@ function pickRandomDifferentQuality(current: Quality): Quality {
 
 const ALL_TRAITS: Trait[] = ['fractal', 'friendly', 'benevolent', 'vampiric', 'unique'];
 
+const ATTRIBUTES_BY_COLOR: Record<Exclude<EmblemColor, 'unknown'>, Attribute[]> = {
+  red: RED_ATTRIBUTES,
+  green: GREEN_ATTRIBUTES,
+  blue: BLUE_ATTRIBUTES,
+};
+
 type EmblemRerollSelection = 'all' | 'first' | 'last' | 'random';
 
 interface EmblemRerollTarget {
@@ -188,6 +195,66 @@ function getEmblemIndicesForReroll(
 
 function pickRandomDifferentTrait(current: Trait): Trait {
   return pickRandomItem(ALL_TRAITS.filter((trait) => trait !== current))!;
+}
+
+function getAttributesUsedByOtherSameColorEmblems(
+  input: ApplyOperationInput,
+  color: Exclude<EmblemColor, 'unknown'>,
+  rerollIndices: number[]
+): Set<Attribute> {
+  const activeCount = getActiveEmblemCount(input.stage);
+  const rerollSet = new Set(rerollIndices);
+  const used = new Set<Attribute>();
+
+  for (let emblemIndex = 0; emblemIndex < activeCount; emblemIndex += 1) {
+    if (!rerollSet.has(emblemIndex) && input.banner.emblems[emblemIndex].color === color) {
+      used.add(input.banner.emblems[emblemIndex].attribute);
+    }
+  }
+
+  return used;
+}
+
+function generateAttributePermutations(pool: Attribute[], length: number): Attribute[][] {
+  if (length === 0) {
+    return [[]];
+  }
+
+  if (length > pool.length) {
+    return [];
+  }
+
+  const results: Attribute[][] = [];
+
+  function build(prefix: Attribute[], remaining: Attribute[]): void {
+    if (prefix.length === length) {
+      results.push(prefix);
+      return;
+    }
+
+    for (let index = 0; index < remaining.length; index += 1) {
+      build([...prefix, remaining[index]], remaining.filter((_, itemIndex) => itemIndex !== index));
+    }
+  }
+
+  build([], pool);
+  return results;
+}
+
+function pickStatRerollAssignment(
+  currentAttributes: Attribute[],
+  availableAttributes: Attribute[]
+): Attribute[] | undefined {
+  const permutations = generateAttributePermutations(
+    availableAttributes,
+    currentAttributes.length
+  );
+
+  const candidates = permutations.filter((assignment) =>
+    assignment.every((attribute, index) => attribute !== currentAttributes[index])
+  );
+
+  return pickRandomItem(candidates);
 }
 
 function applyRerollQuality(
@@ -244,13 +311,70 @@ function applyRerollTrait(
   };
 }
 
+function applyRerollStat(
+  input: ApplyOperationInput,
+  target: EmblemRerollTarget
+): ApplyOperationResult {
+  const emblemIndices = getEmblemIndicesForReroll(input, target);
+  if (emblemIndices.length === 0) {
+    return {
+      status: 'skipped',
+      reason: skipNoColorEmblems(target.color),
+    };
+  }
+
+  const usedByOtherSameColorEmblems = getAttributesUsedByOtherSameColorEmblems(
+    input,
+    target.color,
+    emblemIndices
+  );
+  const availableAttributes = ATTRIBUTES_BY_COLOR[target.color].filter(
+    (attribute) => !usedByOtherSameColorEmblems.has(attribute)
+  );
+
+  if (availableAttributes.length < emblemIndices.length) {
+    return { status: 'skipped', reason: 'noEligibleEmblems' };
+  }
+
+  const currentAttributes = emblemIndices.map(
+    (emblemIndex) => input.banner.emblems[emblemIndex].attribute
+  );
+  const assignment = pickStatRerollAssignment(currentAttributes, availableAttributes);
+
+  if (!assignment) {
+    return { status: 'skipped', reason: 'noEligibleEmblems' };
+  }
+
+  const assignmentByIndex = new Map<number, Attribute>();
+  emblemIndices.forEach((emblemIndex, index) => {
+    assignmentByIndex.set(emblemIndex, assignment[index]);
+  });
+
+  return {
+    status: 'applied',
+    banner: {
+      ...input.banner,
+      emblems: input.banner.emblems.map((emblem, index) => {
+        const nextAttribute = assignmentByIndex.get(index);
+        return nextAttribute ? { ...emblem, attribute: nextAttribute } : emblem;
+      }),
+    },
+  };
+}
+
 const OPERATION_APPLIERS: Record<Operation, OperationApplier> = {
-  rerollStatForGreenEmblems: unimplemented,
-  rerollStatForFirstGreenEmblem: unimplemented,
-  rerollStatForLastGreenEmblem: unimplemented,
-  rerollStatForRandomGreenEmblem: unimplemented,
-  rerollStatForRedEmblems: unimplemented,
-  rerollStatForBlueEmblems: unimplemented,
+  rerollStatForGreenEmblems: (input) =>
+    applyRerollStat(input, { color: 'green', selection: 'all' }),
+  rerollStatForFirstGreenEmblem: (input) =>
+    applyRerollStat(input, { color: 'green', selection: 'first' }),
+  rerollStatForLastGreenEmblem: (input) =>
+    applyRerollStat(input, { color: 'green', selection: 'last' }),
+  rerollStatForRandomGreenEmblem: (input) =>
+    applyRerollStat(input, { color: 'green', selection: 'random' }),
+  rerollStatForRedEmblems: (input) =>
+    applyRerollStat(input, { color: 'red', selection: 'all' }),
+  rerollStatForBlueEmblems: (input) =>
+    applyRerollStat(input, { color: 'blue', selection: 'all' }),
   randomlyIncreaseOneQuality: applyRandomlyIncreaseOneQuality,
   randomlyIncreaseTwoQualitiesAndReduceOne: applyRandomlyIncreaseTwoQualitiesAndReduceOne,
   rerollQualityForGreenEmblems: (input) =>

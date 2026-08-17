@@ -1,4 +1,5 @@
 import type { Banner, BannerScoreOptions, Quality, Stage, Trait } from './types';
+import type { StatWeights } from './statsRanking/types';
 
 const GROUP_STAGE_EMBLEM_COUNT = 3;
 const MAIN_STAGE_EMBLEM_COUNT = 5;
@@ -175,7 +176,7 @@ export function getBannerTotalPercent(
   return total;
 }
 
-export function getBannerDeltaPercent(
+export function getBannerDeltaTotalPercent(
   original: Banner,
   simulated: Banner,
   stage: Stage,
@@ -229,4 +230,89 @@ export function getBannerTraitDeltaPercent(
   const originalTotal = getBannerTraitTotalPercent(original, stage, options);
   const simulatedTotal = getBannerTraitTotalPercent(simulated, stage, options);
   return simulatedTotal - originalTotal;
+}
+
+function getEmblemStatWeight(
+  banner: Banner,
+  emblemIndex: number,
+  stage: Stage,
+  statWeights: StatWeights
+): number {
+  const emblem = banner.emblems[emblemIndex];
+  if (!emblem || !isActiveEmblem(emblemIndex, stage)) {
+    return 0;
+  }
+
+  const color = emblem.color;
+  if (color !== 'red' && color !== 'green' && color !== 'blue') {
+    return 0;
+  }
+
+  return statWeights[banner.role]?.[color]?.[emblem.attribute] ?? 0;
+}
+
+export function getEmblemOverallScore(
+  banner: Banner,
+  emblemIndex: number,
+  stage: Stage,
+  statWeights: StatWeights,
+  options?: BannerScoreOptions
+): number {
+  const emblemPercent = getEmblemTotalPercent(banner, emblemIndex, stage, options);
+  const statWeight = getEmblemStatWeight(banner, emblemIndex, stage, statWeights);
+  return (emblemPercent / 100) * statWeight;
+}
+
+export function getBannerStatWeight(
+  banner: Banner,
+  stage: Stage,
+  statWeights: StatWeights
+): number {
+  let total = 0;
+
+  for (let emblemIndex = 0; emblemIndex < getActiveEmblemCount(stage); emblemIndex += 1) {
+    total += getEmblemStatWeight(banner, emblemIndex, stage, statWeights);
+  }
+  
+  return total;
+}
+
+export function getBannerStatWeightDelta(
+  original: Banner,
+  simulated: Banner,
+  stage: Stage,
+  statWeights: StatWeights
+): number {
+  return (
+    getBannerStatWeight(simulated, stage, statWeights) -
+    getBannerStatWeight(original, stage, statWeights)
+  );
+}
+
+export function getBannerOverallScore(
+  banner: Banner,
+  stage: Stage,
+  statWeights: StatWeights,
+  options?: BannerScoreOptions
+): number {
+  let total = 0;
+
+  for (let emblemIndex = 0; emblemIndex < getActiveEmblemCount(stage); emblemIndex += 1) {
+    total += getEmblemOverallScore(banner, emblemIndex, stage, statWeights, options);
+  }
+
+  return total;
+}
+
+export function getBannerOverallScoreDelta(
+  original: Banner,
+  simulated: Banner,
+  stage: Stage,
+  statWeights: StatWeights,
+  options?: BannerScoreOptions
+): number {
+  return (
+    getBannerOverallScore(simulated, stage, statWeights, options) -
+    getBannerOverallScore(original, stage, statWeights, options)
+  );
 }

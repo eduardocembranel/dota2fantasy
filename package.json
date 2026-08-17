@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "generate:match-metrics-index": "node scripts/generate-match-metrics-index.mjs",
+    "dev": "npm run generate:match-metrics-index && vite",
+    "build": "npm run generate:match-metrics-index && tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {

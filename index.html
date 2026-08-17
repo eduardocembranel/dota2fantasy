@@ -213,6 +213,7 @@
           </div>
         </article>
       </div>
+      <p class="banner-expected-score"><span class="banner-expected-score__label">Expected Score:</span> <span class="banner-expected-score__value">—</span></p>
     </section>
 
     <!-- MID -->
@@ -389,6 +390,7 @@
           </div>
         </article>
       </div>
+      <p class="banner-expected-score"><span class="banner-expected-score__label">Expected Score:</span> <span class="banner-expected-score__value">—</span></p>
     </section>
 
     <!-- SUPPORT -->
@@ -565,33 +567,142 @@
           </div>
         </article>
       </div>
+      <p class="banner-expected-score"><span class="banner-expected-score__label">Expected Score:</span> <span class="banner-expected-score__value">—</span></p>
     </section>
 
   </main>
+
+  <!-- Simulation settings (single panel, tabbed) -->
+  <section class="sim-panels" aria-label="Simulation settings">
+    <div class="sim-panel">
+      <div class="sim-panel__wrap" id="simulation-settings-panel">
+        <button
+          type="button"
+          class="sim-panel__trigger"
+          id="simulation-settings-trigger"
+          aria-expanded="false"
+          aria-controls="simulation-settings-body"
+        >
+          <span class="sim-panel__title-group">
+            <span class="sim-panel__title" id="simulation-settings-title">Simulation settings</span>
+            <span class="sim-panel__chevron-wrap" aria-hidden="true">
+              <span class="sim-panel__chevron sim-panel__chevron--down"></span>
+              <span class="sim-panel__chevron sim-panel__chevron--up"></span>
+            </span>
+          </span>
+          <span class="sim-panel__summary" id="simulation-settings-summary">Loading leagues...</span>
+        </button>
+        <div class="sim-panel__body" id="simulation-settings-body">
+          <div class="sim-tabs" role="tablist" aria-label="Simulation settings sections">
+            <button type="button" class="sim-tab-btn active" data-sim-tab="general" role="tab" aria-selected="true" aria-controls="sim-tab-general" id="sim-tab-btn-general">General</button>
+            <button type="button" class="sim-tab-btn" data-sim-tab="stat-weights" role="tab" aria-selected="false" aria-controls="sim-tab-stat-weights" id="sim-tab-btn-stat-weights">Stat weights</button>
+          </div>
+
+          <div class="sim-tab-content active" data-sim-content="general" id="sim-tab-general" role="tabpanel" aria-labelledby="sim-tab-btn-general">
+            <p class="sim-panel__desc" id="simulation-settings-desc">
+              Options that affect how operation probabilities are simulated on your banners.
+            </p>
+            <label class="fractal-toggle">
+              <input type="checkbox" id="ignore-fractal-bonus" class="fractal-toggle__input" />
+              <span class="fractal-toggle__label">Ignore fractal bonus in simulation</span>
+              <span
+                class="fractal-toggle__hint"
+                tabindex="0"
+                role="button"
+                aria-label="Why ignore fractal bonus?"
+                onmousedown="event.preventDefault()"
+              >
+                ?
+                <span class="fractal-toggle__tooltip">
+                  In most cases, ignoring fractal bonus gives more realistic simulation results.
+                  The +60% requires all active qualities to be different — as qualities improve
+                  over time, that condition usually breaks and the bonus disappears, making
+                  fractal-driven gains or losses often misleading.
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <div class="sim-tab-content" data-sim-content="stat-weights" id="sim-tab-stat-weights" role="tabpanel" aria-labelledby="sim-tab-btn-stat-weights" hidden>
+            <p class="sim-panel__desc" id="stat-weight-description">
+              Choose which pro matches to analyze. These filters define how strong each stat is per role,
+              which affects stat reroll probabilities when you run an operation below.
+            </p>
+
+            <div class="sim-field-row">
+              <div class="sim-field">
+                <label class="sim-field__label" id="sim-leagues-label" for="league-multiselect-trigger">Leagues</label>
+                <div class="filter-dropdown" id="league-multiselect">
+                  <button
+                    type="button"
+                    class="filter-dropdown__trigger"
+                    id="league-multiselect-trigger"
+                    aria-expanded="false"
+                    aria-haspopup="listbox"
+                    aria-controls="league-multiselect-menu"
+                  >
+                    <span class="filter-dropdown__value" id="league-multiselect-value">Loading leagues...</span>
+                    <span class="filter-dropdown__chevron" aria-hidden="true"></span>
+                  </button>
+                  <div class="filter-dropdown__menu" id="league-multiselect-menu" role="listbox" aria-multiselectable="true" hidden></div>
+                </div>
+              </div>
+
+              <div class="sim-field">
+                <label class="sim-field__label" id="weight-metric-label" for="weight-metric-trigger">Weight metric</label>
+                <div class="filter-dropdown" id="weight-metric-select">
+                  <button
+                    type="button"
+                    class="filter-dropdown__trigger"
+                    id="weight-metric-trigger"
+                    aria-expanded="false"
+                    aria-haspopup="listbox"
+                    aria-controls="weight-metric-menu"
+                  >
+                    <span class="filter-dropdown__value" id="weight-metric-value">Average</span>
+                    <span class="filter-dropdown__chevron" aria-hidden="true"></span>
+                  </button>
+                  <div class="filter-dropdown__menu" id="weight-metric-menu" role="listbox" hidden>
+                    <button
+                      type="button"
+                      class="filter-dropdown__choice filter-dropdown__choice--selected"
+                      data-value="avg"
+                      role="option"
+                      aria-selected="true"
+                      id="weight-metric-option-avg"
+                    >
+                      <span id="weight-metric-avg-label">Average</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="filter-dropdown__choice"
+                      data-value="top3"
+                      role="option"
+                      aria-selected="false"
+                      id="weight-metric-option-top3"
+                    >
+                      <span id="weight-metric-top3-label">Top 3 scores</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-weight-preview">
+              <h4 class="stat-weight-preview__title" id="stat-rank-preview-title">Ranking preview</h4>
+              <div id="stat-rank-preview-root" class="stat-rank-preview-root"></div>
+              <p class="stat-rank-footnote" id="stat-rank-footnote">Based on 0 matches</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Global operations panel -->
   <section class="global-operations">
     <div class="operations-panel">
       <h2 class="panel-title">Probability Calculator</h2>
-      <label class="fractal-toggle">
-        <input type="checkbox" id="ignore-fractal-bonus" class="fractal-toggle__input" />
-        <span class="fractal-toggle__label">Ignore fractal bonus in simulation</span>
-        <span
-          class="fractal-toggle__hint"
-          tabindex="0"
-          role="button"
-          aria-label="Why ignore fractal bonus?"
-          onmousedown="event.preventDefault()"
-        >
-          ?
-          <span class="fractal-toggle__tooltip">
-            In most cases, ignoring fractal bonus gives more realistic simulation results.
-            The +60% requires all active qualities to be different — as qualities improve
-            over time, that condition usually breaks and the bonus disappears, making
-            fractal-driven gains or losses often misleading.
-          </span>
-        </span>
-      </label>
       <div class="op-tabs">
         <button class="op-tab-btn active" data-target="stats">Stats</button>
         <button class="op-tab-btn" data-target="quality">Qualities</button>

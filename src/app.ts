@@ -1,8 +1,13 @@
-import { initI18n, registerSimulationRerender } from './applyI18n';
+import { initI18n, registerSimulationOptionsRerender, registerSimulationRerender, refreshStatRankPreviewLabels } from './applyI18n';
+import { getLanguage, getTranslations } from './i18n';
+import { computeStatWeights, getStatWeights } from './statsRanking/computeStatWeights';
+import { getMatchesByLeagues, getAvailableLeagues, isMatchMetricsLoaded } from './matchMetrics/loadMatchMetrics';
+import type { WeightMetric } from './statsRanking/types';
 import { renderSimulationResults } from './renderResults';
 import {
   formatBonusPercent,
   formatTotalPercent,
+  getBannerOverallScore,
   getEmblemTotalPercent,
   getQualityBonusPercent,
   getTraitBonusPercent,
@@ -13,17 +18,18 @@ import {
   RED_ATTRIBUTES,
 } from './i18n';
 import { calculateOperationOutcome } from './probability';
-import type {
-  AppState,
-  Attribute,
-  Banner,
-  EmblemColor,
-  Operation,
-  OperationCategory,
-  Quality,
-  Role,
-  Stage,
-  Trait,
+import {
+  OPERATION_CATEGORY,
+  type AppState,
+  type Attribute,
+  type Banner,
+  type EmblemColor,
+  type Operation,
+  type OperationCategory,
+  type Quality,
+  type Role,
+  type Stage,
+  type Trait,
 } from './types';
 
 export const appState: AppState = {
@@ -233,10 +239,33 @@ function updateEmblemDisplay(emblemEl: HTMLElement): void {
 
 function syncBannerEmblemDisplays(columnEl: HTMLElement): void {
   columnEl.querySelectorAll<HTMLElement>('.emblem').forEach(updateEmblemDisplay);
+  updateBannerExpectedScore(columnEl);
+}
+
+function updateBannerExpectedScore(columnEl: HTMLElement): void {
+  const banner = readBanner(columnEl);
+  const stage = getActiveStage();
+  const statWeights = getStatWeights();
+  const expectedScore = Math.round(getBannerOverallScore(banner, stage, statWeights) * 2);
+
+  const labelEl = columnEl.querySelector('.banner-expected-score__label');
+  if (labelEl) {
+    labelEl.textContent = getTranslations(getLanguage()).expectedScoreLabel;
+  }
+
+  const valueEl = columnEl.querySelector('.banner-expected-score__value');
+  if (valueEl) {
+    valueEl.textContent = String(expectedScore);
+  }
+}
+
+function syncAllBannerExpectedScores(): void {
+  document.querySelectorAll<HTMLElement>('.column').forEach(updateBannerExpectedScore);
 }
 
 function syncAllEmblemDisplays(): void {
   document.querySelectorAll<HTMLElement>('.emblem').forEach(updateEmblemDisplay);
+  syncAllBannerExpectedScores();
 }
 
 function emitEmblemUpdated(event: Event): void {
@@ -250,13 +279,6 @@ function emitEmblemUpdated(event: Event): void {
 
   const state = refreshAppState();
   console.log('[emblem:updated]', state);
-}
-
-function parseOperationCategory(value: string | null): OperationCategory {
-  if (value === 'stats' || value === 'quality' || value === 'trait') {
-    return value;
-  }
-  return 'stats';
 }
 
 function getIgnoreFractalBonus(): boolean {
@@ -306,7 +328,7 @@ function emitOperationSelected(
 
   const resultsContainer = document.getElementById('simulation-results');
   if (resultsContainer) {
-    renderSimulationResults(resultsContainer, operation, category, outcome, ignoreFractalBonus);
+    renderSimulationResults(resultsContainer, operation, outcome, ignoreFractalBonus);
   }
 }
 
@@ -331,9 +353,8 @@ function initOperationListeners() {
 
   operationButtons.forEach((button) => {
     button.addEventListener('click', () => {
-      const contentEl = button.closest('.op-content');
-      const category = parseOperationCategory(contentEl?.getAttribute('data-content') ?? null);
       const operation = parseOperation(button.getAttribute('data-operation') ?? '');
+      const category = OPERATION_CATEGORY[operation];
 
       emitOperationSelected(operation, category, button);
     });
@@ -390,7 +411,500 @@ function initFractalToggle() {
     return;
   }
 
-  input.addEventListener('change', rerunLastSimulation);
+  input.addEventListener('change', () => {
+    updateSimulationPanelSummary();
+    rerunLastSimulation();
+  });
+}
+
+const ROLES: Role[] = ['core', 'mid', 'support'];
+
+const ROLE_EMBLEM_COLORS: Record<Role, Array<Exclude<EmblemColor, 'unknown'>>> = {
+  core: ['red', 'green'],
+  mid: ['red', 'green', 'blue'],
+  support: ['green', 'blue'],
+};
+
+const COLOR_ATTRIBUTES: Record<Exclude<EmblemColor, 'unknown'>, Attribute[]> = {
+  red: RED_ATTRIBUTES,
+  green: GREEN_ATTRIBUTES,
+  blue: BLUE_ATTRIBUTES,
+};
+
+function getStatRankGroupLabel(color: Exclude<EmblemColor, 'unknown'>): string {
+  const copy = getTranslations(getLanguage());
+  if (color === 'red') {
+    return copy.statRankGroupRed;
+  }
+  if (color === 'green') {
+    return copy.statRankGroupGreen;
+  }
+  return copy.statRankGroupBlue;
+}
+
+function getStatRankSortValue(rankEl: HTMLElement): number {
+  const text = rankEl.textContent?.trim() ?? '';
+  if (text === '—' || text === '') {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  const value = Number(text);
+  return Number.isFinite(value) ? value : Number.NEGATIVE_INFINITY;
+}
+
+function sortStatRankListsDescending(): void {
+  document.querySelectorAll<HTMLUListElement>('.stat-rank-list').forEach((list) => {
+    const items = Array.from(list.querySelectorAll<HTMLLIElement>('.stat-rank-list__item'));
+    items.sort((a, b) => {
+      const aRank = a.querySelector<HTMLElement>('.stat-rank-list__rank');
+      const bRank = b.querySelector<HTMLElement>('.stat-rank-list__rank');
+      const aValue = aRank ? getStatRankSortValue(aRank) : Number.NEGATIVE_INFINITY;
+      const bValue = bRank ? getStatRankSortValue(bRank) : Number.NEGATIVE_INFINITY;
+      return bValue - aValue;
+    });
+
+    items.forEach((item) => list.append(item));
+  });
+}
+
+function buildStatRankPreviewTables(): void {
+  const container = document.getElementById('stat-rank-preview-root');
+  if (!container) {
+    return;
+  }
+
+  container.replaceChildren();
+
+  const columns = document.createElement('div');
+  columns.className = 'stat-rank-columns';
+
+  for (const role of ROLES) {
+    const column = document.createElement('section');
+    column.className = 'stat-rank-role-column';
+    column.dataset.role = role;
+
+    const title = document.createElement('h5');
+    title.className = 'stat-rank-role-column__title';
+    title.dataset.role = role;
+
+    const body = document.createElement('div');
+    body.className = 'stat-rank-role-column__body';
+
+    for (const color of ROLE_EMBLEM_COLORS[role]) {
+      const group = document.createElement('div');
+      group.className = `stat-rank-color-group stat-rank-color-group--${color}`;
+      group.dataset.role = role;
+      group.dataset.statColor = color;
+
+      const header = document.createElement('div');
+      header.className = 'stat-rank-color-group__header';
+      header.dataset.statColor = color;
+      header.textContent = getStatRankGroupLabel(color);
+
+      const list = document.createElement('ul');
+      list.className = 'stat-rank-list';
+
+      for (const attribute of COLOR_ATTRIBUTES[color]) {
+        const item = document.createElement('li');
+        item.className = 'stat-rank-list__item';
+
+        const stat = document.createElement('span');
+        stat.className = 'stat-rank-list__stat';
+        stat.dataset.attribute = attribute;
+
+        const rank = document.createElement('span');
+        rank.className = 'stat-rank-list__rank';
+        rank.textContent = '1';
+
+        item.append(stat, rank);
+        list.append(item);
+      }
+
+      group.append(header, list);
+      body.append(group);
+    }
+
+    column.append(title, body);
+    columns.append(column);
+  }
+
+  container.append(columns);
+}
+
+function getSelectedLeagueCheckboxes(): HTMLInputElement[] {
+  return Array.from(
+    document.querySelectorAll<HTMLInputElement>('#league-multiselect-menu .filter-dropdown__checkbox'),
+  );
+}
+
+function getSelectedLeagueIds(): string[] {
+  return getSelectedLeagueCheckboxes()
+    .filter((input) => input.checked)
+    .map((input) => input.dataset.leagueId ?? '')
+    .filter((id) => id.length > 0);
+}
+
+function getWeightMetric(): WeightMetric {
+  const selected = document.querySelector<HTMLButtonElement>(
+    '#weight-metric-menu .filter-dropdown__choice--selected',
+  );
+  return selected?.getAttribute('data-value') === 'top3' ? 'top3' : 'avg';
+}
+
+function closeAllFilterDropdowns(): void {
+  document.querySelectorAll<HTMLElement>('.filter-dropdown').forEach((dropdown) => {
+    dropdown.classList.remove('filter-dropdown--open');
+    const trigger = dropdown.querySelector<HTMLButtonElement>('.filter-dropdown__trigger');
+    const menu = dropdown.querySelector<HTMLElement>('.filter-dropdown__menu');
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+    if (menu) {
+      menu.hidden = true;
+    }
+  });
+}
+
+function updateWeightMetricValueLabel(): void {
+  const valueEl = document.getElementById('weight-metric-value');
+  const selected = document.querySelector<HTMLButtonElement>(
+    '#weight-metric-menu .filter-dropdown__choice--selected',
+  );
+  if (valueEl && selected) {
+    valueEl.textContent = selected.textContent?.trim() ?? valueEl.textContent;
+  }
+}
+
+function getSelectedLeagueCount(): number {
+  return getSelectedLeagueCheckboxes().filter((input) => input.checked).length;
+}
+
+function getTotalLeagueCount(): number {
+  return getSelectedLeagueCheckboxes().length;
+}
+
+function updateSimulationPanelsUi(): void {
+  updateSimulationPanelSummary();
+  updateLeagueMultiselectLabel();
+  updateWeightMetricValueLabel();
+  updateStatRankPreview();
+}
+
+function updateStatRankPreview(): void {
+  const footnote = document.getElementById('stat-rank-footnote');
+  const copy = getTranslations(getLanguage());
+
+  if (!isMatchMetricsLoaded()) {
+    document.querySelectorAll<HTMLElement>('.stat-rank-list__rank').forEach((rankEl) => {
+      rankEl.textContent = '—';
+    });
+
+    if (footnote) {
+      footnote.textContent = copy.statRankFootnote.replace('{count}', '0');
+    }
+    return;
+  }
+
+  const weights = computeStatWeights({
+    leagueIds: getSelectedLeagueIds(),
+    weightMetric: getWeightMetric(),
+  });
+
+  syncAllBannerExpectedScores();
+
+  document.querySelectorAll<HTMLElement>('.stat-rank-color-group').forEach((group) => {
+    const role = group.dataset.role as Role | undefined;
+    const color = group.dataset.statColor;
+    if (!role || !color) {
+      return;
+    }
+
+    group.querySelectorAll<HTMLLIElement>('.stat-rank-list__item').forEach((item) => {
+      const attribute = item.querySelector<HTMLElement>('.stat-rank-list__stat')?.getAttribute('data-attribute') as Attribute | null;
+      const rankEl = item.querySelector<HTMLElement>('.stat-rank-list__rank');
+      if (!attribute || !rankEl) {
+        return;
+      }
+
+      const colorKey = color as 'red' | 'green' | 'blue';
+      const weight = weights[role]?.[colorKey]?.[attribute];
+      rankEl.textContent = weight !== undefined ? String(weight) : '—';
+    });
+  });
+
+  sortStatRankListsDescending();
+
+  if (footnote) {
+    const matchCount = getMatchesByLeagues(getSelectedLeagueIds()).length;
+    footnote.textContent = copy.statRankFootnote.replace('{count}', String(matchCount));
+  }
+}
+
+function updateLeagueMultiselectLabel(): void {
+  const valueEl = document.getElementById('league-multiselect-value');
+  const trigger = document.getElementById('league-multiselect-trigger');
+  if (!valueEl) {
+    return;
+  }
+
+  const copy = getTranslations(getLanguage());
+  const checkboxes = getSelectedLeagueCheckboxes();
+
+  if (checkboxes.length === 0) {
+    valueEl.textContent =
+      trigger instanceof HTMLButtonElement && trigger.disabled
+        ? copy.leaguesLoading
+        : copy.leaguesEmpty;
+    return;
+  }
+
+  const selectedCount = getSelectedLeagueCount();
+  const totalCount = getTotalLeagueCount();
+
+  if (selectedCount === totalCount) {
+    valueEl.textContent = copy.leagueMultiselectAll.replace('{count}', String(totalCount));
+  } else {
+    valueEl.textContent = copy.leagueMultiselectCount.replace('{count}', String(selectedCount));
+  }
+}
+
+export function populateLeagueFilterFromMatchMetrics(): void {
+  const menu = document.getElementById('league-multiselect-menu');
+  const trigger = document.getElementById('league-multiselect-trigger');
+  if (!menu || !trigger) {
+    return;
+  }
+
+  const leagues = getAvailableLeagues();
+
+  if (leagues.length === 0) {
+    menu.replaceChildren();
+    if (trigger instanceof HTMLButtonElement) {
+      trigger.disabled = true;
+    }
+    updateSimulationPanelsUi();
+    return;
+  }
+
+  if (trigger instanceof HTMLButtonElement) {
+    trigger.disabled = false;
+  }
+  menu.replaceChildren(
+    ...leagues.map(({ leagueId, matchCount }) => {
+      const label = document.createElement('label');
+      label.className = 'filter-dropdown__option';
+
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.className = 'filter-dropdown__checkbox';
+      input.dataset.leagueId = leagueId;
+      input.dataset.matchCount = String(matchCount);
+      input.checked = true;
+
+      const text = document.createElement('span');
+      text.textContent = leagueId;
+
+      label.append(input, text);
+      return label;
+    }),
+  );
+
+  updateSimulationPanelsUi();
+}
+
+function updateSimulationPanelSummary(): void {
+  const summary = document.getElementById('simulation-settings-summary');
+  if (!summary) {
+    return;
+  }
+
+  const copy = getTranslations(getLanguage());
+  const fractalInput = document.getElementById('ignore-fractal-bonus');
+  const ignored = fractalInput instanceof HTMLInputElement && fractalInput.checked;
+  const fractalPart = ignored
+    ? copy.simulationSettingsSummaryIgnored
+    : copy.simulationSettingsSummaryIncluded;
+
+  const trigger = document.getElementById('league-multiselect-trigger');
+  const checkboxes = getSelectedLeagueCheckboxes();
+  const metric = getWeightMetric();
+  const metricPart =
+    metric === 'top3' ? copy.weightMetricSummaryTop3 : copy.weightMetricSummaryAvg;
+
+  if (checkboxes.length === 0) {
+    const leaguePart =
+      trigger instanceof HTMLButtonElement && trigger.disabled
+        ? copy.leaguesLoading
+        : copy.leaguesEmpty;
+    summary.textContent = `${fractalPart} · ${leaguePart} · ${metricPart}`;
+    return;
+  }
+
+  const selectedCount = getSelectedLeagueCount();
+  const totalCount = getTotalLeagueCount();
+
+  const leaguePart =
+    selectedCount === totalCount
+      ? copy.statWeightSummaryAllLeagues
+      : copy.leagueMultiselectCount.replace('{count}', String(selectedCount));
+
+  summary.textContent = `${fractalPart} · ${leaguePart} · ${metricPart}`;
+}
+
+function initSimulationSettingsTabs(): void {
+  const panel = document.getElementById('simulation-settings-body');
+  if (!panel) {
+    return;
+  }
+
+  const tabs = panel.querySelectorAll<HTMLButtonElement>('.sim-tab-btn');
+  const contents = panel.querySelectorAll<HTMLElement>('.sim-tab-content');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('data-sim-tab');
+
+      tabs.forEach((button) => {
+        const isActive = button === tab;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', String(isActive));
+      });
+
+      contents.forEach((content) => {
+        const isActive = content.getAttribute('data-sim-content') === target;
+        content.classList.toggle('active', isActive);
+        content.hidden = !isActive;
+      });
+    });
+  });
+}
+
+function initCollapsiblePanel(
+  panelId: string,
+  triggerId: string,
+  bodyId: string,
+): void {
+  const panel = document.getElementById(panelId);
+  const trigger = document.getElementById(triggerId);
+  const body = document.getElementById(bodyId);
+
+  if (!panel || !trigger || !body) {
+    return;
+  }
+
+  trigger.addEventListener('click', () => {
+    const isOpen = panel.classList.toggle('sim-panel__wrap--open');
+    trigger.setAttribute('aria-expanded', String(isOpen));
+  });
+}
+
+function initLeagueMultiselect(): void {
+  const root = document.getElementById('league-multiselect');
+  const trigger = document.getElementById('league-multiselect-trigger');
+  const menu = document.getElementById('league-multiselect-menu');
+
+  if (!root || !trigger || !menu) {
+    return;
+  }
+
+  trigger.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (trigger instanceof HTMLButtonElement && trigger.disabled) {
+      return;
+    }
+
+    const willOpen = !root.classList.contains('filter-dropdown--open');
+    closeAllFilterDropdowns();
+    if (willOpen) {
+      root.classList.add('filter-dropdown--open');
+      trigger.setAttribute('aria-expanded', 'true');
+      menu.hidden = false;
+    }
+  });
+
+  menu.addEventListener('change', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || !target.classList.contains('filter-dropdown__checkbox')) {
+      return;
+    }
+
+    if (getSelectedLeagueCount() === 0) {
+      target.checked = true;
+      return;
+    }
+
+    updateSimulationPanelsUi();
+  });
+}
+
+function initWeightMetricSelect(): void {
+  const root = document.getElementById('weight-metric-select');
+  const trigger = document.getElementById('weight-metric-trigger');
+  const menu = document.getElementById('weight-metric-menu');
+  const valueEl = document.getElementById('weight-metric-value');
+
+  if (!root || !trigger || !menu || !valueEl) {
+    return;
+  }
+
+  trigger.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const willOpen = !root.classList.contains('filter-dropdown--open');
+    closeAllFilterDropdowns();
+    if (willOpen) {
+      root.classList.add('filter-dropdown--open');
+      trigger.setAttribute('aria-expanded', 'true');
+      menu.hidden = false;
+    }
+  });
+
+  menu.querySelectorAll<HTMLButtonElement>('.filter-dropdown__choice').forEach((choice) => {
+    choice.addEventListener('click', () => {
+      menu.querySelectorAll<HTMLButtonElement>('.filter-dropdown__choice').forEach((option) => {
+        option.classList.remove('filter-dropdown__choice--selected');
+        option.setAttribute('aria-selected', 'false');
+      });
+
+      choice.classList.add('filter-dropdown__choice--selected');
+      choice.setAttribute('aria-selected', 'true');
+      valueEl.textContent = choice.textContent?.trim() ?? valueEl.textContent;
+
+      root.classList.remove('filter-dropdown--open');
+      trigger.setAttribute('aria-expanded', 'false');
+      menu.hidden = true;
+      updateSimulationPanelsUi();
+    });
+  });
+}
+
+function initFilterDropdownDismiss(): void {
+  document.addEventListener('click', (event) => {
+    const target = event.target as Node;
+    const clickedInsideDropdown = Array.from(document.querySelectorAll<HTMLElement>('.filter-dropdown')).some(
+      (dropdown) => dropdown.contains(target),
+    );
+
+    if (!clickedInsideDropdown) {
+      closeAllFilterDropdowns();
+    }
+  });
+}
+
+function initSimulationPanels(): void {
+  initCollapsiblePanel('simulation-settings-panel', 'simulation-settings-trigger', 'simulation-settings-body');
+  initSimulationSettingsTabs();
+  initFilterDropdownDismiss();
+  initLeagueMultiselect();
+  initWeightMetricSelect();
+  buildStatRankPreviewTables();
+  refreshStatRankPreviewLabels(getLanguage());
+
+  const leagueTrigger = document.getElementById('league-multiselect-trigger');
+  if (leagueTrigger instanceof HTMLButtonElement) {
+    leagueTrigger.disabled = true;
+  }
+
+  updateSimulationPanelsUi();
 }
 
 export function initApp() {
@@ -401,7 +915,9 @@ export function initApp() {
   initOperationListeners();
   initOperationsTabs();
   initStageSelector();
+  initSimulationPanels();
   initFractalToggle();
   registerSimulationRerender(rerunLastSimulation);
+  registerSimulationOptionsRerender(updateSimulationPanelsUi);
   logAppState();
 }

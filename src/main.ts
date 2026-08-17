@@ -6,6 +6,7 @@ import {
   getDashboardState,
   initApp,
   logAppState,
+  populateLeagueFilterFromMatchMetrics,
   parseQuality,
   parseTrait,
   parseAttribute,
@@ -16,8 +17,21 @@ import {
   refreshAppState,
 } from './app';
 import { calculateOperationOutcome } from './probability';
+import { initMatchMetrics } from './matchMetrics/loadMatchMetrics';
 
 initApp();
+
+initMatchMetrics().then(({ matches, failed }) => {
+  populateLeagueFilterFromMatchMetrics();
+  console.log('[match-metrics] loaded', {
+    matches: matches.length,
+    failed: failed.length,
+    sample: matches[0],
+  });
+  if (failed.length > 0) {
+    console.warn('[match-metrics] failed to load', failed);
+  }
+});
 
 window.dotaFantasy = {
   appState,

@@ -1,9 +1,14 @@
 import {
-  getBannerDeltaPercent,
+  getBannerDeltaTotalPercent,
+  getBannerOverallScore,
+  getBannerOverallScoreDelta,
   getBannerQualityDeltaPercent,
+  getBannerStatWeight,
+  getBannerStatWeightDelta,
   getBannerTraitDeltaPercent,
 } from './bannerScore';
 import { applyOperation } from './operations/appliers';
+import { getStatWeights } from './statsRanking/computeStatWeights';
 import type {
   ApplyOperationInput,
   Banner,
@@ -61,24 +66,38 @@ function summarizeBanner(
   context: OperationContext
 ): Pick<
   Extract<BannerOperationSummary, { status: 'simulated' }>,
-  'qualityOutcome' | 'traitOutcome' | 'emblemTotalOutcome'
+  | 'qualityOutcome'
+  | 'traitOutcome'
+  | 'totalPercentOutcome'
+  | 'statWeightOutcome'
+  | 'overallScoreOutcome'
+  | 'statWeightTotal'
+  | 'overallScoreTotal'
 > {
   const scoreOptions = getBannerScoreOptions(context);
   const stage = context.stage;
+  const statWeights = getStatWeights();
 
   return {
+    statWeightTotal: getBannerStatWeight(originalBanner, stage, statWeights),
+    overallScoreTotal: getBannerOverallScore(
+      originalBanner,
+      stage,
+      statWeights,
+      scoreOptions
+    ),
     qualityOutcome: summarizeSimulationOutcomes(
       originalBanner,
       simulatedBanners,
       stage,
       getBannerQualityDeltaPercent
     ),
-    emblemTotalOutcome: summarizeSimulationOutcomes(
+    totalPercentOutcome: summarizeSimulationOutcomes(
       originalBanner,
       simulatedBanners,
       stage,
       (original, simulated, simulationStage) =>
-        getBannerDeltaPercent(original, simulated, simulationStage, scoreOptions)
+        getBannerDeltaTotalPercent(original, simulated, simulationStage, scoreOptions)
     ),
     traitOutcome: summarizeSimulationOutcomes(
       originalBanner,
@@ -86,6 +105,26 @@ function summarizeBanner(
       stage,
       (original, simulated, simulationStage) =>
         getBannerTraitDeltaPercent(original, simulated, simulationStage, scoreOptions)
+    ),
+    statWeightOutcome: summarizeSimulationOutcomes(
+      originalBanner,
+      simulatedBanners,
+      stage,
+      (original, simulated, simulationStage) =>
+        getBannerStatWeightDelta(original, simulated, simulationStage, statWeights)
+    ),
+    overallScoreOutcome: summarizeSimulationOutcomes(
+      originalBanner,
+      simulatedBanners,
+      stage,
+      (original, simulated, simulationStage) =>
+        getBannerOverallScoreDelta(
+          original,
+          simulated,
+          simulationStage,
+          statWeights,
+          scoreOptions
+        )
     ),
   };
 }

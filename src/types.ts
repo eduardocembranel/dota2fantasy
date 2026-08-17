@@ -222,7 +222,11 @@ export type BannerOperationSummary =
       status: 'simulated';
       qualityOutcome: OperationOutcome;
       traitOutcome: OperationOutcome;
-      emblemTotalOutcome: OperationOutcome;
+      totalPercentOutcome: OperationOutcome;
+      statWeightOutcome: OperationOutcome;
+      overallScoreOutcome: OperationOutcome;
+      statWeightTotal: number;
+      overallScoreTotal: number;
     }
   | {
       status: 'skipped';
