@@ -454,6 +454,7 @@ type HighlightKind = 'attribute' | 'quality' | 'trait';
 interface OperationHighlight {
   kind: HighlightKind;
   color: KnownColor | 'all';
+  selection: 'all' | 'first' | 'last' | 'random';
 }
 
 function getOperationHighlight(operation: Operation): OperationHighlight {
@@ -461,7 +462,7 @@ function getOperationHighlight(operation: Operation): OperationHighlight {
     operation === 'randomlyIncreaseOneQuality' ||
     operation === 'randomlyIncreaseTwoQualitiesAndReduceOne'
   ) {
-    return { kind: 'quality', color: 'all' };
+    return { kind: 'quality', color: 'all', selection: 'all' };
   }
 
   const kind: HighlightKind = operation.includes('Stat')
@@ -476,7 +477,15 @@ function getOperationHighlight(operation: Operation): OperationHighlight {
       ? 'red'
       : 'blue';
 
-  return { kind, color };
+  const selection: OperationHighlight['selection'] = operation.includes('First')
+    ? 'first'
+    : operation.includes('Last')
+      ? 'last'
+      : operation.includes('Random')
+        ? 'random'
+        : 'all';
+
+  return { kind, color, selection };
 }
 
 function getEmblemColorFromClass(emblemEl: HTMLElement): KnownColor | null {
@@ -492,6 +501,16 @@ function getEmblemColorFromClass(emblemEl: HTMLElement): KnownColor | null {
   return null;
 }
 
+function getRowForKind(emblemEl: HTMLElement, kind: HighlightKind): HTMLElement | null {
+  if (kind === 'attribute') {
+    return emblemEl.querySelector<HTMLElement>('.emblem-header');
+  }
+  if (kind === 'quality') {
+    return emblemEl.querySelector<HTMLElement>('.emblem-row:has(.quality-select)');
+  }
+  return emblemEl.querySelector<HTMLElement>('.emblem-row:has(.trait-select)');
+}
+
 function applyHighlight(operation: Operation): void {
   if (!dashboardEl) {
     return;
@@ -501,23 +520,28 @@ function applyHighlight(operation: Operation): void {
 
   const target = getOperationHighlight(operation);
 
-  dashboardEl.querySelectorAll<HTMLElement>('.emblem').forEach((emblemEl) => {
-    const emblemColor = getEmblemColorFromClass(emblemEl);
-    if (!emblemColor || (target.color !== 'all' && emblemColor !== target.color)) {
-      return;
-    }
+  const matching = Array.from(dashboardEl.querySelectorAll<HTMLElement>('.emblem')).filter(
+    (emblemEl) => {
+      const emblemColor = getEmblemColorFromClass(emblemEl);
+      return emblemColor && (target.color === 'all' || emblemColor === target.color);
+    },
+  );
 
-    const row =
-      target.kind === 'attribute'
-        ? emblemEl.querySelector<HTMLElement>('.emblem-header')
-        : target.kind === 'quality'
-          ? emblemEl.querySelector<HTMLElement>('.emblem-row:has(.quality-select)')
-          : emblemEl.querySelector<HTMLElement>('.emblem-row:has(.trait-select)');
+  const toHighlight: HTMLElement[] =
+    matching.length === 0
+      ? []
+      : target.selection === 'first'
+        ? [matching[0]]
+        : target.selection === 'last'
+          ? [matching[matching.length - 1]]
+          : matching;
 
+  for (const emblemEl of toHighlight) {
+    const row = getRowForKind(emblemEl, target.kind);
     if (row) {
       row.classList.add('training-highlight');
     }
-  });
+  }
 }
 
 function clearHighlight(): void {
