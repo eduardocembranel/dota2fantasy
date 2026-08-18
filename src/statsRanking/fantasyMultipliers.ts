@@ -10,7 +10,7 @@ export const FANTASY_MULTIPLIERS: Partial<Record<Attribute, number>> = {
   teamfight: 2124,
   stuns: 10,
   firstBlood: 1934,
-  tormentorKills: 1934,
+  tormentorKills: 879,
   roshanKills: 1172,
   courierKills: 703,
   wardsPlaced: 117,
