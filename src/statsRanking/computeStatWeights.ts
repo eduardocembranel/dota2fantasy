@@ -58,35 +58,32 @@ const ATTRIBUTE_TO_FIELD: Partial<Record<Attribute, keyof PlayerMatchStats>> = {
   smokesUsed: 'smokes_used',
 };
 
-type AvgAccumulator = { sum: number; count: number };
-
-type AvgAccumulators = Record<
+type Samples = Record<
   Role,
-  Partial<Record<StatColor, Partial<Record<Attribute, AvgAccumulator>>>>
+  Partial<Record<StatColor, Partial<Record<Attribute, number[]>>>>
 >;
 
-function createEmptyAccumulators(): AvgAccumulators {
+function createEmptySamples(): Samples {
   return { core: {}, mid: {}, support: {} };
 }
 
 function recordSample(
-  acc: AvgAccumulators,
+  samples: Samples,
   role: Role,
   color: StatColor,
   attribute: Attribute,
   value: number,
 ): void {
-  if (!acc[role][color]) {
-    acc[role][color] = {};
+  if (!samples[role][color]) {
+    samples[role][color] = {};
   }
 
-  const colorAcc = acc[role][color]!;
-  if (!colorAcc[attribute]) {
-    colorAcc[attribute] = { sum: 0, count: 0 };
+  const colorSamples = samples[role][color]!;
+  if (!colorSamples[attribute]) {
+    colorSamples[attribute] = [];
   }
 
-  colorAcc[attribute]!.sum += value;
-  colorAcc[attribute]!.count += 1;
+  colorSamples[attribute]!.push(value);
 }
 
 function getNumericStatValue(player: PlayerMatchStats, field: keyof PlayerMatchStats): number | null {
@@ -133,43 +130,8 @@ function averageFantasyScoresForPositions(
   return fantasyScores.reduce((sum, score) => sum + score, 0) / fantasyScores.length;
 }
 
-function accumulatorsToWeights(acc: AvgAccumulators): StatWeights {
-  const weights: StatWeights = { core: {}, mid: {}, support: {} };
-
-  for (const role of ROLES) {
-    for (const color of ROLE_COLORS[role]) {
-      for (const attribute of COLOR_ATTRIBUTES[color]) {
-        const bucket = acc[role][color]?.[attribute];
-        if (!bucket || bucket.count === 0) {
-          continue;
-        }
-
-        if (!weights[role][color]) {
-          weights[role][color] = {};
-        }
-
-        const avg = bucket.sum / bucket.count;
-        weights[role][color]![attribute] =
-          role === 'mid'
-            ? applyFantasyScore(attribute, avg)
-            : avg;
-      }
-    }
-  }
-
-  return weights;
-}
-
-export function getStatWeights(): StatWeights {
-  return statWeights ?? { core: {}, mid: {}, support: {} };
-}
-
-export function isStatWeightsLoaded(): boolean {
-  return statWeights !== null;
-}
-
-function computeStatWeightsAvg(matches: MatchMetrics[]): StatWeights {
-  const acc = createEmptyAccumulators();
+function collectSamples(matches: MatchMetrics[]): Samples {
+  const samples = createEmptySamples();
 
   for (const match of matches) {
     for (const side of MATCH_SIDES) {
@@ -192,7 +154,7 @@ function computeStatWeightsAvg(matches: MatchMetrics[]): StatWeights {
                 continue;
               }
 
-              recordSample(acc, role, color, attribute, value);
+              recordSample(samples, role, color, attribute, value);
               continue;
             }
 
@@ -207,40 +169,93 @@ function computeStatWeightsAvg(matches: MatchMetrics[]): StatWeights {
               continue;
             }
 
-            recordSample(acc, role, color, attribute, matchSideScore);
+            recordSample(samples, role, color, attribute, matchSideScore);
           }
         }
       }
     }
   }
 
-  return accumulatorsToWeights(acc);
+  return samples;
+}
+
+function percentile(values: number[], p: number): number {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = (sorted.length - 1) * p;
+  const lower = Math.floor(index);
+  const upper = Math.ceil(index);
+  const weight = index - lower;
+
+  return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+}
+
+function samplesToWeights(
+  samples: Samples,
+  reducer: (values: number[]) => number,
+): StatWeights {
+  const weights: StatWeights = { core: {}, mid: {}, support: {} };
+
+  for (const role of ROLES) {
+    for (const color of ROLE_COLORS[role]) {
+      for (const attribute of COLOR_ATTRIBUTES[color]) {
+        const bucket = samples[role][color]?.[attribute];
+        if (!bucket || bucket.length === 0) {
+          continue;
+        }
+
+        if (!weights[role][color]) {
+          weights[role][color] = {};
+        }
+
+        const aggregated = reducer(bucket);
+        weights[role][color]![attribute] =
+          role === 'mid'
+            ? applyFantasyScore(attribute, aggregated)
+            : aggregated;
+      }
+    }
+  }
+
+  return weights;
+}
+
+export function getStatWeights(): StatWeights {
+  return statWeights ?? { core: {}, mid: {}, support: {} };
+}
+
+export function isStatWeightsLoaded(): boolean {
+  return statWeights !== null;
+}
+
+function computeStatWeightsAvg(matches: MatchMetrics[]): StatWeights {
+  const samples = collectSamples(matches);
+  return samplesToWeights(samples, (values) => {
+    const sum = values.reduce((acc, value) => acc + value, 0);
+    return sum / values.length;
+  });
+}
+
+function computeStatWeightsPercentile(matches: MatchMetrics[], p: number): StatWeights {
+  const samples = collectSamples(matches);
+  return samplesToWeights(samples, (values) => percentile(values, p));
 }
 
 export function computeStatWeights(options: ComputeStatWeightsOptions): StatWeights {
   console.log("computeStatWeights", options);
-  const matches = getMatchesByLeagues(options.leagueIds);
+  let matches = getMatchesByLeagues(options.leagueIds);
+
+  if (options.minDuration && options.minDuration > 0) {
+    matches = matches.filter((match) => match.duration > options.minDuration!);
+  }
 
   if (options.weightMetric === 'avg') {
     statWeights = computeStatWeightsAvg(matches);
   } else {
-    // top3 — placeholder until computeStatWeightsTop3 exists
-    void matches;
-    statWeights = {
-      core: {
-        red: { kills: 800 },
-        green: { teamfight: 400 },
-      },
-      mid: {
-        red: { gpm: 700 },
-        green: { stuns: 500 },
-        blue: { wardsPlaced: 300 },
-      },
-      support: {
-        green: { courierKills: 200 },
-        blue: { smokesUsed: 600 },
-      },
-    };
+    statWeights = computeStatWeightsPercentile(matches, Number(options.weightMetric.slice(1)) / 100);
   }
 
   return statWeights;

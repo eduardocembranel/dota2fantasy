@@ -1080,7 +1080,7 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
 
 .sim-field-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 

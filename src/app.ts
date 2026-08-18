@@ -573,7 +573,18 @@ function getWeightMetric(): WeightMetric {
   const selected = document.querySelector<HTMLButtonElement>(
     '#weight-metric-menu .filter-dropdown__choice--selected',
   );
-  return selected?.getAttribute('data-value') === 'top3' ? 'top3' : 'avg';
+  const value = selected?.getAttribute('data-value');
+  return value === 'p50' || value === 'p60' || value === 'p70' || value === 'p80' || value === 'p90'
+    ? value
+    : 'avg';
+}
+
+function getMinDuration(): number {
+  const selected = document.querySelector<HTMLButtonElement>(
+    '#match-duration-menu .filter-dropdown__choice--selected',
+  );
+  const value = Number(selected?.getAttribute('data-value'));
+  return Number.isFinite(value) ? value : 0;
 }
 
 function closeAllFilterDropdowns(): void {
@@ -633,6 +644,7 @@ function updateStatRankPreview(): void {
   const weights = computeStatWeights({
     leagueIds: getSelectedLeagueIds(),
     weightMetric: getWeightMetric(),
+    minDuration: getMinDuration(),
   });
 
   syncAllEmblemDisplays();
@@ -660,8 +672,11 @@ function updateStatRankPreview(): void {
   sortStatRankListsDescending();
 
   if (footnote) {
-    const matchCount = getMatchesByLeagues(getSelectedLeagueIds()).length;
-    footnote.textContent = copy.statRankFootnote.replace('{count}', String(matchCount));
+    const minDuration = getMinDuration();
+    const allMatches = getMatchesByLeagues(getSelectedLeagueIds());
+    const filteredMatches =
+      minDuration > 0 ? allMatches.filter((match) => match.duration > minDuration) : allMatches;
+    footnote.textContent = copy.statRankFootnote.replace('{count}', String(filteredMatches.length));
   }
 }
 
@@ -753,15 +768,28 @@ function updateSimulationPanelSummary(): void {
   const trigger = document.getElementById('league-multiselect-trigger');
   const checkboxes = getSelectedLeagueCheckboxes();
   const metric = getWeightMetric();
-  const metricPart =
-    metric === 'top3' ? copy.weightMetricSummaryTop3 : copy.weightMetricSummaryAvg;
+  const metricSummary: Record<WeightMetric, string> = {
+    avg: copy.weightMetricSummaryAvg,
+    p50: copy.weightMetricSummaryP50,
+    p60: copy.weightMetricSummaryP60,
+    p70: copy.weightMetricSummaryP70,
+    p80: copy.weightMetricSummaryP80,
+    p90: copy.weightMetricSummaryP90,
+  };
+  const metricPart = metricSummary[metric];
+
+  const minDuration = getMinDuration();
+  const durationPart =
+    minDuration > 0
+      ? copy.matchDurationSummaryMin.replace('{min}', String(Math.round(minDuration / 60)))
+      : copy.matchDurationSummaryAll;
 
   if (checkboxes.length === 0) {
     const leaguePart =
       trigger instanceof HTMLButtonElement && trigger.disabled
         ? copy.leaguesLoading
         : copy.leaguesEmpty;
-    summary.textContent = `${fractalPart} · ${leaguePart} · ${metricPart}`;
+    summary.textContent = `${fractalPart} · ${leaguePart} · ${metricPart} · ${durationPart}`;
     return;
   }
 
@@ -773,7 +801,7 @@ function updateSimulationPanelSummary(): void {
       ? copy.statWeightSummaryAllLeagues
       : copy.leagueMultiselectCount.replace('{count}', String(selectedCount));
 
-  summary.textContent = `${fractalPart} · ${leaguePart} · ${metricPart}`;
+  summary.textContent = `${fractalPart} · ${leaguePart} · ${metricPart} · ${durationPart}`;
 }
 
 function initSimulationSettingsTabs(): void {
@@ -902,6 +930,46 @@ function initWeightMetricSelect(): void {
   });
 }
 
+function initMatchDurationSelect(): void {
+  const root = document.getElementById('match-duration-select');
+  const trigger = document.getElementById('match-duration-trigger');
+  const menu = document.getElementById('match-duration-menu');
+  const valueEl = document.getElementById('match-duration-value');
+
+  if (!root || !trigger || !menu || !valueEl) {
+    return;
+  }
+
+  trigger.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const willOpen = !root.classList.contains('filter-dropdown--open');
+    closeAllFilterDropdowns();
+    if (willOpen) {
+      root.classList.add('filter-dropdown--open');
+      trigger.setAttribute('aria-expanded', 'true');
+      menu.hidden = false;
+    }
+  });
+
+  menu.querySelectorAll<HTMLButtonElement>('.filter-dropdown__choice').forEach((choice) => {
+    choice.addEventListener('click', () => {
+      menu.querySelectorAll<HTMLButtonElement>('.filter-dropdown__choice').forEach((option) => {
+        option.classList.remove('filter-dropdown__choice--selected');
+        option.setAttribute('aria-selected', 'false');
+      });
+
+      choice.classList.add('filter-dropdown__choice--selected');
+      choice.setAttribute('aria-selected', 'true');
+      valueEl.textContent = choice.textContent?.trim() ?? valueEl.textContent;
+
+      root.classList.remove('filter-dropdown--open');
+      trigger.setAttribute('aria-expanded', 'false');
+      menu.hidden = true;
+      updateSimulationPanelsUi();
+    });
+  });
+}
+
 function initFilterDropdownDismiss(): void {
   document.addEventListener('click', (event) => {
     const target = event.target as Node;
@@ -921,6 +989,7 @@ function initSimulationPanels(): void {
   initFilterDropdownDismiss();
   initLeagueMultiselect();
   initWeightMetricSelect();
+  initMatchDurationSelect();
   buildStatRankPreviewTables();
   refreshStatRankPreviewLabels(getLanguage());
 

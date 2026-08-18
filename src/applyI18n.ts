@@ -189,10 +189,69 @@ function updateStaticText(language: Language): void {
   if (weightMetricAvgLabel) {
     weightMetricAvgLabel.textContent = copy.weightMetricAvg;
   }
+  const weightMetricP50Label = document.getElementById('weight-metric-p50-label');
+  if (weightMetricP50Label) {
+    weightMetricP50Label.textContent = copy.weightMetricP50;
+  }
 
-  const weightMetricTop3Label = document.getElementById('weight-metric-top3-label');
-  if (weightMetricTop3Label) {
-    weightMetricTop3Label.textContent = copy.weightMetricTop3;
+  const weightMetricP60Label = document.getElementById('weight-metric-p60-label');
+  if (weightMetricP60Label) {
+    weightMetricP60Label.textContent = copy.weightMetricP60;
+  }
+
+  const weightMetricP70Label = document.getElementById('weight-metric-p70-label');
+  if (weightMetricP70Label) {
+    weightMetricP70Label.textContent = copy.weightMetricP70;
+  }
+
+  const weightMetricP80Label = document.getElementById('weight-metric-p80-label');
+  if (weightMetricP80Label) {
+    weightMetricP80Label.textContent = copy.weightMetricP80;
+  }
+
+  const weightMetricP90Label = document.getElementById('weight-metric-p90-label');
+  if (weightMetricP90Label) {
+    weightMetricP90Label.textContent = copy.weightMetricP90;
+  }
+
+  const matchDurationLabel = document.getElementById('match-duration-label');
+  if (matchDurationLabel) {
+    matchDurationLabel.textContent = copy.matchDurationLabel;
+  }
+
+  const matchDurationAllLabel = document.getElementById('match-duration-all-label');
+  if (matchDurationAllLabel) {
+    matchDurationAllLabel.textContent = copy.matchDurationAll;
+  }
+
+  const matchDuration30Label = document.getElementById('match-duration-30-label');
+  if (matchDuration30Label) {
+    matchDuration30Label.textContent = copy.matchDuration30;
+  }
+
+  const matchDuration40Label = document.getElementById('match-duration-40-label');
+  if (matchDuration40Label) {
+    matchDuration40Label.textContent = copy.matchDuration40;
+  }
+
+  const matchDuration45Label = document.getElementById('match-duration-45-label');
+  if (matchDuration45Label) {
+    matchDuration45Label.textContent = copy.matchDuration45;
+  }
+
+  const matchDuration50Label = document.getElementById('match-duration-50-label');
+  if (matchDuration50Label) {
+    matchDuration50Label.textContent = copy.matchDuration50;
+  }
+
+  const matchDuration60Label = document.getElementById('match-duration-60-label');
+  if (matchDuration60Label) {
+    matchDuration60Label.textContent = copy.matchDuration60;
+  }
+
+  const matchDuration70Label = document.getElementById('match-duration-70-label');
+  if (matchDuration70Label) {
+    matchDuration70Label.textContent = copy.matchDuration70;
   }
 
   const statRankPreviewTitle = document.getElementById('stat-rank-preview-title');

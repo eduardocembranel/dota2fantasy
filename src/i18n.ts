@@ -67,7 +67,19 @@ type TranslationTree = {
   leagueMultiselectCount: string;
   weightMetricLabel: string;
   weightMetricAvg: string;
-  weightMetricTop3: string;
+  weightMetricP50: string;
+  weightMetricP60: string;
+  weightMetricP70: string;
+  weightMetricP80: string;
+  weightMetricP90: string;
+  matchDurationLabel: string;
+  matchDurationAll: string;
+  matchDuration30: string;
+  matchDuration40: string;
+  matchDuration45: string;
+  matchDuration50: string;
+  matchDuration60: string;
+  matchDuration70: string;
   statRankPreviewTitle: string;
   statWeightsHint: string;
   statRankFootnote: string;
@@ -78,7 +90,13 @@ type TranslationTree = {
   tableRankHeader: string;
   statWeightSummaryAllLeagues: string;
   weightMetricSummaryAvg: string;
-  weightMetricSummaryTop3: string;
+  weightMetricSummaryP50: string;
+  weightMetricSummaryP60: string;
+  weightMetricSummaryP70: string;
+  weightMetricSummaryP80: string;
+  weightMetricSummaryP90: string;
+  matchDurationSummaryAll: string;
+  matchDurationSummaryMin: string;
   tableStatHeader: string;
   fractalToggle: string;
   fractalHintAria: string;
@@ -152,7 +170,7 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
     tabSimGeneral: 'General',
     tabStatWeights: 'Stat weights',
     statWeightSettingsDesc:
-      'Choose which pro matches to analyze. These filters define how strong each stat is per role, which affects stat reroll probabilities when you run an operation below.',
+      'Choose which tournaments and match durations to include, plus the metric used to compute each stat\'s weight per role. These weights drive the stat reroll probabilities for the operations below.',
     leaguesLabel: 'Tournaments',
     leaguesLoading: 'Loading tournaments...',
     leaguesEmpty: 'No tournaments available',
@@ -160,7 +178,19 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
     leagueMultiselectCount: '{count} tournaments',
     weightMetricLabel: 'Weight metric',
     weightMetricAvg: 'Average',
-    weightMetricTop3: 'Top 3 scores',
+    weightMetricP50: '50th percentile',
+    weightMetricP60: '60th percentile',
+    weightMetricP70: '70th percentile',
+    weightMetricP80: '80th percentile',
+    weightMetricP90: '90th percentile',
+    matchDurationLabel: 'Match duration',
+    matchDurationAll: 'All',
+    matchDuration30: '30min+',
+    matchDuration40: '40min+',
+    matchDuration45: '45min+',
+    matchDuration50: '50min+',
+    matchDuration60: '60min+',
+    matchDuration70: '70min+',
     statRankPreviewTitle: 'Ranking preview',
     statWeightsHint: 'Rank per role (1 = strongest stat for that role)',
     statRankFootnote: 'Based on {count} matches',
@@ -171,7 +201,13 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
     tableRankHeader: 'Rank',
     statWeightSummaryAllLeagues: 'All tournaments',
     weightMetricSummaryAvg: 'Average',
-    weightMetricSummaryTop3: 'Top 3 scores',
+    weightMetricSummaryP50: '50th percentile',
+    weightMetricSummaryP60: '60th percentile',
+    weightMetricSummaryP70: '70th percentile',
+    weightMetricSummaryP80: '80th percentile',
+    weightMetricSummaryP90: '90th percentile',
+    matchDurationSummaryAll: 'All durations',
+    matchDurationSummaryMin: '{min}min+',
     tableStatHeader: 'Stat',
     fractalToggle: 'Ignore fractal bonus in simulation',
     fractalHintAria: 'Why ignore fractal bonus?',
@@ -292,7 +328,7 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
     tabSimGeneral: 'Geral',
     tabStatWeights: 'Peso dos atributos',
     statWeightSettingsDesc:
-      'Escolha quais partidas profissionais analisar. Esses filtros definem o quão forte cada atributo é por role, o que afeta as probabilidades de reroll ao executar uma operação abaixo.',
+      'Escolha quais torneios e durações de partida considerar, além da métrica usada para calcular o peso de cada atributo por role. Esses pesos definem as probabilidades de reroll de atributos nas operações abaixo.',
     leaguesLabel: 'Torneios',
     leaguesLoading: 'Carregando torneios...',
     leaguesEmpty: 'Nenhum torneio disponível',
@@ -300,7 +336,19 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
     leagueMultiselectCount: '{count} torneios',
     weightMetricLabel: 'Métrica de peso',
     weightMetricAvg: 'Média',
-    weightMetricTop3: 'Top 3 scores',
+    weightMetricP50: 'Percentil 50',
+    weightMetricP60: 'Percentil 60',
+    weightMetricP70: 'Percentil 70',
+    weightMetricP80: 'Percentil 80',
+    weightMetricP90: 'Percentil 90',
+    matchDurationLabel: 'Duração da partida',
+    matchDurationAll: 'Todas',
+    matchDuration30: '30min+',
+    matchDuration40: '40min+',
+    matchDuration45: '45min+',
+    matchDuration50: '50min+',
+    matchDuration60: '60min+',
+    matchDuration70: '70min+',
     statRankPreviewTitle: 'Prévia do ranking',
     statWeightsHint: 'Rank por role (1 = atributo mais forte para a role)',
     statRankFootnote: 'Baseado em {count} partidas',
@@ -311,7 +359,13 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
     tableRankHeader: 'Rank',
     statWeightSummaryAllLeagues: 'Todos os torneios',
     weightMetricSummaryAvg: 'Média',
-    weightMetricSummaryTop3: 'Top 3 scores',
+    weightMetricSummaryP50: 'Percentil 50',
+    weightMetricSummaryP60: 'Percentil 60',
+    weightMetricSummaryP70: 'Percentil 70',
+    weightMetricSummaryP80: 'Percentil 80',
+    weightMetricSummaryP90: 'Percentil 90',
+    matchDurationSummaryAll: 'Todas as durações',
+    matchDurationSummaryMin: '{min}min+',
     tableStatHeader: 'Atributo',
     fractalToggle: 'Ignorar bônus fractal na simulação',
     fractalHintAria: 'Por que ignorar o bônus fractal?',
