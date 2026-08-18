@@ -8,6 +8,7 @@ import {
   formatBonusPercent,
   formatTotalPercent,
   getBannerOverallScore,
+  getEmblemOverallScore,
   getEmblemTotalPercent,
   getQualityBonusPercent,
   getTraitBonusPercent,
@@ -219,6 +220,7 @@ function updateEmblemDisplay(emblemEl: HTMLElement): void {
   const qualityBonusEl = emblemEl.querySelector('.emblem-row:has(.quality-select) .value');
   const traitBonusEl = emblemEl.querySelector('.emblem-row:has(.trait-select) .value');
   const totalEl = emblemEl.querySelector('.emblem-total');
+  const scoreEl = emblemEl.querySelector('.emblem-expected-score');
 
   if (qualityBonusEl) {
     qualityBonusEl.textContent = formatBonusPercent(getQualityBonusPercent(emblem.quality));
@@ -234,6 +236,11 @@ function updateEmblemDisplay(emblemEl: HTMLElement): void {
     totalEl.textContent = formatTotalPercent(
       getEmblemTotalPercent(banner, emblemIndex, stage)
     );
+  }
+
+  if (scoreEl) {
+    const statWeights = getStatWeights();
+    scoreEl.textContent = String(Math.round(getEmblemOverallScore(banner, emblemIndex, stage, statWeights) * 2));
   }
 }
 
@@ -266,6 +273,24 @@ function syncAllBannerExpectedScores(): void {
 function syncAllEmblemDisplays(): void {
   document.querySelectorAll<HTMLElement>('.emblem').forEach(updateEmblemDisplay);
   syncAllBannerExpectedScores();
+}
+
+function injectEmblemExpectedScores(): void {
+  document.querySelectorAll<HTMLElement>('.emblem').forEach((emblemEl) => {
+    if (emblemEl.querySelector('.emblem-expected-score')) {
+      return;
+    }
+
+    const traitRow = emblemEl.querySelector<HTMLElement>('.emblem-row:has(.trait-select)');
+    const scoreEl = document.createElement('span');
+    scoreEl.className = 'emblem-expected-score';
+
+    if (traitRow) {
+      traitRow.append(scoreEl);
+    } else {
+      emblemEl.append(scoreEl);
+    }
+  });
 }
 
 function emitEmblemUpdated(event: Event): void {
@@ -610,7 +635,7 @@ function updateStatRankPreview(): void {
     weightMetric: getWeightMetric(),
   });
 
-  syncAllBannerExpectedScores();
+  syncAllEmblemDisplays();
 
   document.querySelectorAll<HTMLElement>('.stat-rank-color-group').forEach((group) => {
     const role = group.dataset.role as Role | undefined;
@@ -909,6 +934,7 @@ function initSimulationPanels(): void {
 
 export function initApp() {
   initI18n();
+  injectEmblemExpectedScores();
   syncAllEmblemDisplays();
   refreshAppState();
   initEmblemListeners();

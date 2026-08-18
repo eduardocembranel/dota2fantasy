@@ -437,6 +437,7 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
 }
 
 .emblem {
+  position: relative;
   border: 1px solid;
   padding: 0 0 var(--space-emblem-bottom);
   min-height: var(--emblem-height);
@@ -523,6 +524,18 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
   font-size: var(--font-quality-trait-value-size);
   font-weight: var(--weight-quality-trait-value);
   color: var(--emblem-value);
+}
+
+.emblem-expected-score {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, 40%);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--accent-gold-soft);
+  pointer-events: none;
 }
 
 
