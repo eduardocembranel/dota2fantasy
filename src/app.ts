@@ -653,7 +653,7 @@ function updateStatRankPreview(): void {
 
       const colorKey = color as 'red' | 'green' | 'blue';
       const weight = weights[role]?.[colorKey]?.[attribute];
-      rankEl.textContent = weight !== undefined ? String(weight) : '—';
+      rankEl.textContent = weight !== undefined ? String(Math.round(weight)) : '—';
     });
   });
 
@@ -715,7 +715,7 @@ export function populateLeagueFilterFromMatchMetrics(): void {
     trigger.disabled = false;
   }
   menu.replaceChildren(
-    ...leagues.map(({ leagueId, matchCount }) => {
+    ...leagues.map(({ leagueId, matchCount, leagueName }) => {
       const label = document.createElement('label');
       label.className = 'filter-dropdown__option';
 
@@ -727,7 +727,7 @@ export function populateLeagueFilterFromMatchMetrics(): void {
       input.checked = true;
 
       const text = document.createElement('span');
-      text.textContent = leagueId;
+      text.textContent = leagueName || leagueId;
 
       label.append(input, text);
       return label;

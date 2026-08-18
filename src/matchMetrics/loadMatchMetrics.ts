@@ -127,7 +127,7 @@ export function getMatchesByLeagues(leagueIds: string[]): MatchMetrics[] {
   return getAllMatches().filter((match) => selected.has(String(match.league_id)));
 }
 
-export function getAvailableLeagues(): Array<{ leagueId: string; matchCount: number }> {
+export function getAvailableLeagues(): Array<{ leagueId: string; matchCount: number; leagueName?: string }> {
   const counts = new Map<string, number>();
 
   for (const match of getAllMatches()) {
@@ -135,8 +135,14 @@ export function getAvailableLeagues(): Array<{ leagueId: string; matchCount: num
     counts.set(leagueId, (counts.get(leagueId) ?? 0) + 1);
   }
 
+  const indexLeagues = cachedIndex?.leagues ?? {};
+
   return Array.from(counts.entries())
-    .map(([leagueId, matchCount]) => ({ leagueId, matchCount }))
+    .map(([leagueId, matchCount]) => ({
+      leagueId,
+      matchCount,
+      leagueName: indexLeagues[leagueId]?.leagueName,
+    }))
     .sort((a, b) => Number(a.leagueId) - Number(b.leagueId));
 }
 

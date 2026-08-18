@@ -38,6 +38,7 @@ export interface MatchMetrics {
 
 export interface LeagueIndexEntry {
   matchCount: number;
+  leagueName?: string;
 }
 
 export interface MatchMetricsIndex {

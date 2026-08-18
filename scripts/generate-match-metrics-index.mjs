@@ -6,7 +6,13 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const METRICS_DIR = join(ROOT, 'public', 'match-metrics');
 const BUNDLES_DIR = join(METRICS_DIR, 'bundles');
 const INDEX_PATH = join(METRICS_DIR, 'index.json');
+const LEAGUE_NAMES_PATH = fileURLToPath(new URL('./league-names.json', import.meta.url));
 const SKIP_DIRS = new Set(['bundles']);
+
+async function loadLeagueNames() {
+  const raw = await readFile(LEAGUE_NAMES_PATH, 'utf8');
+  return JSON.parse(raw);
+}
 
 async function buildMatchMetrics() {
   await rm(BUNDLES_DIR, { recursive: true, force: true });
@@ -14,6 +20,7 @@ async function buildMatchMetrics() {
 
   const entries = await readdir(METRICS_DIR, { withFileTypes: true });
   const leagues = {};
+  const leagueNames = await loadLeagueNames();
 
   for (const entry of entries) {
     if (!entry.isDirectory() || SKIP_DIRS.has(entry.name)) {
@@ -44,7 +51,7 @@ async function buildMatchMetrics() {
     const bundlePath = join(BUNDLES_DIR, `${leagueId}.json`);
     await writeFile(bundlePath, JSON.stringify(matches));
 
-    leagues[leagueId] = { matchCount: matches.length };
+    leagues[leagueId] = { matchCount: matches.length, leagueName: leagueNames[leagueId] ?? leagueId };
   }
 
   const totalMatches = Object.values(leagues).reduce(
