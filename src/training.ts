@@ -520,28 +520,30 @@ function applyHighlight(operation: Operation): void {
 
   const target = getOperationHighlight(operation);
 
-  const matching = Array.from(dashboardEl.querySelectorAll<HTMLElement>('.emblem')).filter(
-    (emblemEl) => {
-      const emblemColor = getEmblemColorFromClass(emblemEl);
-      return emblemColor && (target.color === 'all' || emblemColor === target.color);
-    },
-  );
+  dashboardEl.querySelectorAll<HTMLElement>('.training-column').forEach((column) => {
+    const matching = Array.from(column.querySelectorAll<HTMLElement>('.emblem')).filter(
+      (emblemEl) => {
+        const emblemColor = getEmblemColorFromClass(emblemEl);
+        return emblemColor && (target.color === 'all' || emblemColor === target.color);
+      },
+    );
 
-  const toHighlight: HTMLElement[] =
-    matching.length === 0
-      ? []
-      : target.selection === 'first'
-        ? [matching[0]]
-        : target.selection === 'last'
-          ? [matching[matching.length - 1]]
-          : matching;
+    const toHighlight: HTMLElement[] =
+      matching.length === 0
+        ? []
+        : target.selection === 'first'
+          ? [matching[0]]
+          : target.selection === 'last'
+            ? [matching[matching.length - 1]]
+            : matching;
 
-  for (const emblemEl of toHighlight) {
-    const row = getRowForKind(emblemEl, target.kind);
-    if (row) {
-      row.classList.add('training-highlight');
+    for (const emblemEl of toHighlight) {
+      const row = getRowForKind(emblemEl, target.kind);
+      if (row) {
+        row.classList.add('training-highlight');
+      }
     }
-  }
+  });
 }
 
 function clearHighlight(): void {
