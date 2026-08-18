@@ -48,6 +48,12 @@ const ROMAN_TIERS: Record<Quality, string> = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV
 type TranslationTree = {
   pageTitle: string;
   siteTagline: string;
+  tabCalculator: string;
+  tabTraining: string;
+  trainingRemainingLabel: string;
+  trainingSkip: string;
+  trainingReset: string;
+  trainingEmpty: string;
   expectedScoreLabel: string;
   stageGroup: string;
   stageMain: string;
@@ -157,6 +163,12 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
   en: {
     pageTitle: 'Dota 2 Fantasy Calculator',
     siteTagline: 'Fantasy Calculator',
+    tabCalculator: 'Probability Calculator',
+    tabTraining: 'Training Mode',
+    trainingRemainingLabel: 'Rerolls remaining',
+    trainingSkip: 'Skip',
+    trainingReset: 'Reset',
+    trainingEmpty: 'No rerolls remaining',
     expectedScoreLabel: 'Expected Score:',
     stageGroup: 'Group Stage',
     stageMain: 'Main Stage',
@@ -315,6 +327,12 @@ const TRANSLATIONS: Record<Language, TranslationTree> = {
   pt: {
     pageTitle: 'Calculadora Dota dos Sonhos',
     siteTagline: 'Calculadora Dota dos Sonhos',
+    tabCalculator: 'Calculadora de Probabilidade',
+    tabTraining: 'Modo Treino',
+    trainingRemainingLabel: 'Rerolls restantes',
+    trainingSkip: 'Pular',
+    trainingReset: 'Resetar',
+    trainingEmpty: 'Nenhum reroll restante',
     expectedScoreLabel: 'Pontuação esperada:',
     stageGroup: 'Fase de Grupos',
     stageMain: 'Fase Principal',

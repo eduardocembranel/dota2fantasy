@@ -4,6 +4,7 @@ import { computeStatWeights, getStatWeights } from './statsRanking/computeStatWe
 import { getMatchesByLeagues, getAvailableLeagues, isMatchMetricsLoaded } from './matchMetrics/loadMatchMetrics';
 import type { WeightMetric } from './statsRanking/types';
 import { renderSimulationResults } from './renderResults';
+import { initTraining, refreshTrainingView } from './training';
 import {
   formatBonusPercent,
   formatTotalPercent,
@@ -180,7 +181,7 @@ export function readBanner(columnEl: HTMLElement): Banner {
 }
 
 export function getDashboardState(): Record<Role, Banner> {
-  const banners = [...document.querySelectorAll<HTMLElement>('.column')].map(readBanner);
+  const banners = [...document.querySelectorAll<HTMLElement>('#tab-calculator .column')].map(readBanner);
   return Object.fromEntries(banners.map((banner) => [banner.role, banner])) as Record<
     Role,
     Banner
@@ -267,16 +268,16 @@ function updateBannerExpectedScore(columnEl: HTMLElement): void {
 }
 
 function syncAllBannerExpectedScores(): void {
-  document.querySelectorAll<HTMLElement>('.column').forEach(updateBannerExpectedScore);
+  document.querySelectorAll<HTMLElement>('#tab-calculator .column').forEach(updateBannerExpectedScore);
 }
 
 function syncAllEmblemDisplays(): void {
-  document.querySelectorAll<HTMLElement>('.emblem').forEach(updateEmblemDisplay);
+  document.querySelectorAll<HTMLElement>('#tab-calculator .emblem').forEach(updateEmblemDisplay);
   syncAllBannerExpectedScores();
 }
 
 function injectEmblemExpectedScores(): void {
-  document.querySelectorAll<HTMLElement>('.emblem').forEach((emblemEl) => {
+  document.querySelectorAll<HTMLElement>('#tab-calculator .emblem').forEach((emblemEl) => {
     if (emblemEl.querySelector('.emblem-expected-score')) {
       return;
     }
@@ -365,7 +366,7 @@ export function logAppState(): AppState {
 
 function initEmblemListeners() {
   const selects = document.querySelectorAll<HTMLSelectElement>(
-    '.emblem-select, .quality-select, .trait-select'
+    '#tab-calculator .emblem-select, #tab-calculator .quality-select, #tab-calculator .trait-select'
   );
 
   selects.forEach((select) => {
@@ -413,7 +414,7 @@ function initOperationsTabs() {
 }
 
 function initStageSelector() {
-  const stageBtns = document.querySelectorAll<HTMLButtonElement>('.stage-btn');
+  const stageBtns = document.querySelectorAll<HTMLButtonElement>('#tab-calculator .stage-btn');
 
   stageBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -426,6 +427,39 @@ function initStageSelector() {
       }
       syncAllEmblemDisplays();
       refreshAppState();
+    });
+  });
+}
+
+function initAppTabs() {
+  const tabs = document.querySelectorAll<HTMLButtonElement>('.app-tab');
+  const panels: Record<string, HTMLElement | null> = {
+    calculator: document.getElementById('tab-calculator'),
+    training: document.getElementById('tab-training'),
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('data-tab');
+      if (!target) {
+        return;
+      }
+
+      tabs.forEach((other) => {
+        const isActive = other === tab;
+        other.classList.toggle('active', isActive);
+        other.setAttribute('aria-selected', String(isActive));
+      });
+
+      Object.entries(panels).forEach(([key, panel]) => {
+        if (panel) {
+          panel.hidden = key !== target;
+        }
+      });
+
+      if (target === 'training') {
+        refreshTrainingView();
+      }
     });
   });
 }
@@ -1003,6 +1037,7 @@ function initSimulationPanels(): void {
 
 export function initApp() {
   initI18n();
+  initAppTabs();
   injectEmblemExpectedScores();
   syncAllEmblemDisplays();
   refreshAppState();
@@ -1012,6 +1047,7 @@ export function initApp() {
   initStageSelector();
   initSimulationPanels();
   initFractalToggle();
+  initTraining();
   registerSimulationRerender(rerunLastSimulation);
   registerSimulationOptionsRerender(updateSimulationPanelsUi);
   logAppState();

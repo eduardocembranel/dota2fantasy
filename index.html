@@ -25,6 +25,12 @@
     </button>
   </div>
 
+  <nav class="app-tabs" role="tablist" aria-label="Sections">
+    <button type="button" class="app-tab active" id="tab-btn-calculator" data-tab="calculator" role="tab" aria-selected="true" aria-controls="tab-calculator">Probability Calculator</button>
+    <button type="button" class="app-tab" id="tab-btn-training" data-tab="training" role="tab" aria-selected="false" aria-controls="tab-training">Training Mode</button>
+  </nav>
+
+  <div id="tab-calculator" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-calculator">
   <header class="page-header">
     <h1 class="site-title">
       <span class="site-title__brand">Dota 2</span>
@@ -896,6 +902,9 @@
     </div>
     <div id="simulation-results" class="simulation-results"></div>
   </section>
+  </div>
+
+  <section id="tab-training" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-training" hidden></section>
 
   <script type="module" src="/src/main.ts"></script>
 </body>

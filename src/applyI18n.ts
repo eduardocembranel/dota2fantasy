@@ -19,6 +19,7 @@ type RerunSimulationOptions = () => void;
 
 let rerunSimulation: RerunSimulation | null = null;
 let rerunSimulationOptions: RerunSimulationOptions | null = null;
+let rerunTraining: (() => void) | null = null;
 
 export function registerSimulationRerender(callback: RerunSimulation): void {
   rerunSimulation = callback;
@@ -26,6 +27,10 @@ export function registerSimulationRerender(callback: RerunSimulation): void {
 
 export function registerSimulationOptionsRerender(callback: RerunSimulationOptions): void {
   rerunSimulationOptions = callback;
+}
+
+export function registerTrainingRerender(callback: () => void): void {
+  rerunTraining = callback;
 }
 
 function syncQualitySelect(select: HTMLSelectElement): void {
@@ -129,6 +134,16 @@ function updateStaticText(language: Language): void {
   const tagline = document.querySelector('.site-title__tagline');
   if (tagline) {
     tagline.textContent = copy.siteTagline;
+  }
+
+  const tabCalculator = document.getElementById('tab-btn-calculator');
+  if (tabCalculator) {
+    tabCalculator.textContent = copy.tabCalculator;
+  }
+
+  const tabTraining = document.getElementById('tab-btn-training');
+  if (tabTraining) {
+    tabTraining.textContent = copy.tabTraining;
   }
 
   document.querySelectorAll<HTMLElement>('.banner-expected-score__label').forEach((label) => {
@@ -326,6 +341,7 @@ function updateStaticText(language: Language): void {
   });
 
   rerunSimulationOptions?.();
+  rerunTraining?.();
 }
 
 export function applyLanguage(language: Language): void {

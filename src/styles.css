@@ -247,6 +247,57 @@ html {
   box-shadow: inset 0 0 0 1px rgba(212, 180, 131, 0.25);
 }
 
+/* ── 2.6 App tabs ──────────────────────────────────────────────────────── */
+
+.app-tabs {
+  display: flex;
+  gap: 0.4rem;
+  background: var(--stage-bg);
+  padding: 0.4rem;
+  border-radius: 10px;
+  border: 1px solid var(--stage-border);
+}
+
+.app-tab {
+  background: transparent;
+  color: var(--stage-btn-text);
+  border: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.app-tab:hover:not(.active) {
+  background: var(--stage-btn-bg-hover);
+  color: var(--stage-btn-text-hover);
+}
+
+.app-tab.active {
+  background: var(--stage-btn-bg-active);
+  color: var(--stage-btn-text-active);
+  box-shadow:
+    0 2px 8px var(--stage-btn-shadow-active),
+    inset 0 0 0 1px rgba(212, 168, 75, 0.38);
+}
+
+.tab-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.5rem, 2.5vh, 2rem);
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
 /* ── 3. Página ─────────────────────────────────────────────────────────── */
 
 body {
@@ -432,7 +483,8 @@ body {
 /* ── 5. Emblema — base ─────────────────────────────────────────────────── */
 
 /* Hides emblems based on stage context */
-body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
+body[data-active-stage="groupStage"] #tab-calculator .emblem:nth-child(n+4),
+.training-dashboard[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
   display: none;
 }
 
@@ -2088,4 +2140,139 @@ body[data-active-stage="groupStage"] .emblem:nth-child(n+4) {
   .sim-card--best {
     order: -1;
   }
+}
+
+/* ── 13. Training mode ─────────────────────────────────────────────────── */
+
+.training-header {
+  width: 100%;
+  max-width: var(--content-max-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.training-controls {
+  width: 100%;
+  max-width: var(--content-max-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+}
+
+.training-counter {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.training-counter__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-on-parchment-muted);
+}
+
+.training-counter__value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-gold-soft);
+}
+
+.training-operations {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.training-operation-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: var(--panel-surface-strong);
+  color: var(--text-on-parchment);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.training-operation-btn:hover:not(:disabled) {
+  background: var(--panel-hover);
+}
+
+.training-operation-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.training-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.training-action-btn {
+  padding: 0.55rem 1.4rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-on-parchment);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.training-action-btn:hover {
+  background: var(--panel-hover);
+}
+
+.training-action-btn--primary {
+  background: var(--league-chip-bg-active);
+  border-color: var(--league-chip-border-active);
+}
+
+.training-empty {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-on-parchment-muted);
+}
+
+.training-column {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: box-shadow 0.15s ease;
+}
+
+.training-column:hover {
+  box-shadow: 0 0 0 1px rgba(212, 180, 131, 0.35);
+}
+
+.training-column--selected,
+.training-column--selected:hover {
+  box-shadow:
+    0 0 0 2px var(--accent-gold-soft),
+    0 6px 20px rgba(0, 0, 0, 0.28);
+}
+
+.training-column--selected .role-title {
+  color: var(--accent-gold);
+}
+
+.training-highlight {
+  box-shadow: inset 0 0 0 2px var(--accent-gold);
 }
